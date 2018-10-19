@@ -1,0 +1,295 @@
+### These are sites I used for either documentation or ideas
+
+https://www.valentinog.com/blog/webpack-tutorial/
+
+
+https://forum.webix.com/discussion/32709/webpack-integration
+
+//https://stackoverflow.com/questions/33108712/papaya-dicom-image-viewer-swap-main-slice //https://stackoverflow.com/questions/32972955/papaya-viewer-command-to-view-next-slice //https://github.com/rii-mango/Papaya/wiki/Configuration
+//https://github.com/rii-mango/Papaya/wiki/How-To-Make-a-Context-Manager var params = []; // params["worldSpace"] = true;
+//https://stackoverflow.com/questions/49766612/make-pagination-in-papaya-dicom-viewer-slices-using-javascript
+Now, i have some coordinates like [{x: 10, y: 50}, {x: 50, y: 50}, {x: 50, y: 100}, {x:10,y: 50}].
+and these coordinates are relative to the source dicom's position.
+
+when I set params['radiological'] = true.
+and i add a prototype function like:
+
+papaya.viewer.Viewer.prototype.translateCoordinate = function (coordinate, type) {
+if (type == 'x') {
+return (this.axialSlice.finalTransform[0][2] + (coordinate + 0.5) * this.axialSlice.finalTransform[0][0])
+} else {
+return (this.axialSlice.finalTransform[1][2] + (coordinate + 0.5) * this.axialSlice.finalTransform[1][1])
+}
+}
+
+
+let a = 0;
+while (2 > a) {
+papaya.Container.addViewer(a, params);
+a++;
+}
+this is draw rect part code:
+
+context.lineWidth = 1
+context.moveTo(that.translateCoordinate(rect[0].x, 'x'), that.translateCoordinate(rect[0].y, 'y'))
+arr.forEach(function (item) {
+context.lineTo(that.translateCoordinate(item[0], 'x'), that.translateCoordinate(item[1], 'y'))
+})
+context.closePath()
+context.stroke()
+//toggle palette.. toggle overlay toggle alpha...
+
+
+Now, i have some coordinates like [{x: 10, y: 50}, {x: 50, y: 50}, {x: 50, y: 100}, {x:10,y: 50}].
+and these coordinates are relative to the source dicom's position.
+
+when I set params['radiological'] = true.
+and i add a prototype function like:
+
+papaya.viewer.Viewer.prototype.translateCoordinate = function (coordinate, type) {
+if (type == 'x') {
+return (this.axialSlice.finalTransform[0][2] + (coordinate + 0.5) * this.axialSlice.finalTransform[0][0])
+} else {
+return (this.axialSlice.finalTransform[1][2] + (coordinate + 0.5) * this.axialSlice.finalTransform[1][1])
+}
+}
+
+
+params = ['images', 'showControls', 'showControlBar', 'orthogonal', 'smoothDisplay', 'coordinate'];
+params['images'] = [pathImg];
+params['orthogonal'] = false;
+params['smoothDisplay'] = false;
+params['showControlBar'] = false;
+params['showControls'] = false;
+params.loadingComplete = () => {
+this.startPapaya();
+};
+
+let a = 0;
+while (2 > a) {
+papaya.Container.addViewer(a, params);
+a++;
+}
+this is draw rect part code:
+
+context.lineWidth = 1
+context.moveTo(that.translateCoordinate(rect[0].x, 'x'), that.translateCoordinate(rect[0].y, 'y'))
+arr.forEach(function (item) {
+context.lineTo(that.translateCoordinate(item[0], 'x'), that.translateCoordinate(item[1], 'y'))
+})
+context.closePath()
+context.stroke()
+//toggle palette.. toggle overlay toggle alpha...
+papayaContainers[0].viewer.toggleOverlay(1)  <<< TO DO >>>
+
+-->
+    <!-- If you don't specify height and width for the papyaya container, it defaults to full screen -->
+    <script>
+    webix.protoUI({
+        name: "webixPapaya",
+        $init: function(config) {
+            this.$view.innerHTML = "<div class='papaya' data-params='params'>";
+        },
+        defaults: {
+            width: 600,
+            height: 600
+        }
+    }, webix.ui.view);
+
+
+    //papaya.Container.startPapaya() <<< THIS ALSO NEEDS TO RUN AFTER CREATING THE DIV
+
+    //then add myanimation component to layout
+    </script>
+    <div id="main_layout"></div>
+    <!-- <div id="papayaContainer"    style="width:600px; height:600px;"> -->
+    <!-- <div class="papaya" data-params="params">
+<button id="swap-slice" class="papaya-main-swap" type="button" style="display: block; top: 475px; left: 700px; position: relative;">Swap Main Slice</button>
+</div> -->
+    <script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+        $(".papaya-main-swap").click(function() {
+            papaya.viewer.Viewer.prototype.rotateViews();
+        });
+    });
+
+    var params = [];
+
+    var leftPanel = {
+        rows: [{ view: "template", template: "TopPanel" },
+            { view: "template", template: "MaskImagePanel" }
+        ]
+    }
+    var rightPanel = {
+        rows: [
+            { view: "template", template: "HeaderText" }, {
+                view: "template",
+                body: { content: "papayaContainer" }
+            }
+        ]
+    }
+    //I need to keep abstracting this... the lut/min/max can be inferred from the 
+    //imageType
+
+    mainImg = sampleDataSets["MNI_1mm"][0]["path"];
+    maskImg = sampleDataSets["MNI_1mm"][1]["path"];
+    secondMaskImg = sampleDataSets["MNI_1mm"][2]["path"];
+
+    params[maskImg] = {
+        "min": 0,
+        "max": 10,
+        "lut": "Fire"
+    };
+
+    params[maskImg] = {
+        "min": 0,
+        "max": 10,
+        "lut": "Blue"
+    };
+
+
+    // papayaContainers[0].viewer.screenVolumes[1].changeColorTable(myViewer ,"Green Overlay")
+    //     papayaContainers[0].viewer.toggleOverlay(1)
+
+
+    var papayaColorTables = ["Grayscale", "Spectrum", "Overlay (Positives)", "Overlay (Negatives)", "Hot-and-Cold", "Gold", "Red Overlay", "Green Overlay", "Blue Overlay"]
+
+    params["images"] = [mainImg, maskImg, secondMaskImg];
+    //look into passing different sets of params to each viewer on creation...
+
+    //I am manually adding two sets of controls, long term I want this to be dynamically added  
+
+    var layout = {
+        container: "main_layout",
+        cols: [
+            { view: "webixPapaya", id: "view1" },
+            { view: "webixPapaya", id: "view2" },
+            {
+                rows: [
+                    { type: "header", template: "Viewer Controls" },
+                    {
+                        view: "slider",
+                        label: "baseImgSlider",
+                        value: "20",
+                        min: 0,
+                        max: 1,
+                        step: 0.05,
+                        name: "s1",
+                        on: {
+                            "onChange": function(newv, oldv) {
+                                //so the volId refers to the order it's on the 
+                                papayaContainers[0].viewer.screenVolumes[0].alpha = newv;
+                                    
+                            }
+                        }
+                    },
+                    {
+                        view: "combo",
+                        label: "baseImgColorTable",
+                        options: papayaColorTables,
+                        on: {
+                            "onChange": function(newv, oldv) {
+                                webix.message(newv);
+
+                                myViewer = papayaContainers[0].viewer;
+                                //To Do.... Unclear why I need to pass myViewer to this
+                                papayaContainers[0].viewer.screenVolumes[0].changeColorTable(myViewer, newv)
+
+                            }
+                        }
+
+                    },
+                    {
+                        view: "slider",
+                        label: "maskOneImgSlider",
+                        value: "0.5",
+                        min: 0,
+                        max: 1,
+                        step: 0.05,
+                        name: "s2",
+                        on: {
+                            "onChange": function(newv, oldv) {
+                                //so the volId refers to the order it's on the 
+                                papayaContainers[0].viewer.screenVolumes[1].alpha = newv;
+                                papayaContainers[0].viewer.drawViewer(true, false);
+                            }
+                        }
+
+                    },
+                    {
+                        view: "combo",
+                        label: "maskImgColorTable",
+                        options: papayaColorTables,
+                        on: {
+                            "onChange": function(newv, oldv) {
+                                webix.message(newv);
+
+                                myViewer = papayaContainers[0].viewer;
+                                //To Do.... Unclear why I need to pass myViewer to this
+                                papayaContainers[0].viewer.screenVolumes[1].changeColorTable(myViewer, newv)
+
+                            }
+                        }
+
+                    },
+
+                    {
+                        view: "slider",
+                        label: "maskTwoImgSlider",
+                        value: "0.5",
+                        min: 0,
+                        max: 1,
+                        step: 0.05,
+                        name: "s3",
+                        on: {
+                            "onChange": function(newv, oldv) {
+                                //so the volId refers to the order it's on the 
+                                papayaContainers[0].viewer.screenVolumes[2].alpha = newv;
+                                papayaContainers[0].viewer.drawViewer(true, false);
+                            }
+                        }
+
+                    },
+                    {
+                        view:"slider",
+                        label: "maskTwoMinMaskSlider",
+                        value: 1,
+                        min: 0,
+                        max:10,
+                        on:
+                            {
+                                "onChange": function(newv,oldv)
+                                    {
+                      papayaContainers[0].viewer.screenVolumes[2].screenM
+
+
+//SOME DETAILS ABOUT THE COLOR SPACES    
+
+
+papaya.viewer.ColorTable.TABLE_GRAYSCALE = {"name": "Grayscale", "data": [[0, 0, 0, 0], [1, 1, 1, 1]],
+    "gradation": true};
+papaya.viewer.ColorTable.TABLE_SPECTRUM = {"name": "Spectrum", "data": [[0, 0, 0, 0], [0.1, 0, 0, 1], [0.33, 0, 1, 1],
+    [0.5, 0, 1, 0], [0.66, 1, 1, 0], [0.9, 1, 0, 0], [1, 1, 1, 1]], "gradation": true};
+papaya.viewer.ColorTable.TABLE_RED2YELLOW = {"name": "Overlay (Positives)", "data": [[0, 1, 0, 0], [1, 1, 1, 0]],
+    "gradation": true};
+papaya.viewer.ColorTable.TABLE_BLUE2GREEN = {"name": "Overlay (Negatives)", "data": [[0, 0, 0, 1], [1, 0, 1, 0]],
+    "gradation": true};
+papaya.viewer.ColorTable.TABLE_HOTANDCOLD = {"name": "Hot-and-Cold", "data": [[0, 0, 0, 1], [0.15, 0, 1, 1],
+    [0.3, 0, 1, 0], [0.45, 0, 0, 0], [0.5, 0, 0, 0], [0.55, 0, 0, 0], [0.7, 1, 1, 0], [0.85, 1, 0, 0], [1, 1, 1, 1]],
+    "gradation": true};
+papaya.viewer.ColorTable.TABLE_GOLD = {"name": "Gold", "data": [[0, 0, 0, 0], [0.13, 0.19, 0.03, 0],
+    [0.25, 0.39, 0.12, 0], [0.38, 0.59, 0.26, 0], [0.50, 0.80, 0.46, 0.08], [0.63, 0.99, 0.71, 0.21],
+    [0.75, 0.99, 0.88, 0.34], [0.88, 0.99, 0.99, 0.48], [1, 0.90, 0.95, 0.61]], "gradation": true};
+papaya.viewer.ColorTable.TABLE_RED2WHITE = {"name": "Red Overlay", "data": [[0, 0.75, 0, 0], [0.5, 1, 0.5, 0],
+    [0.95, 1, 1, 0], [1, 1, 1, 1]], "gradation": true};
+papaya.viewer.ColorTable.TABLE_GREEN2WHITE = {"name": "Green Overlay", "data": [[0, 0, 0.75, 0], [0.5, 0.5, 1, 0],
+    [0.95, 1, 1, 0], [1, 1, 1, 1]], "gradation": true};
+papaya.viewer.ColorTable.TABLE_BLUE2WHITE = {"name": "Blue Overlay", "data": [[0, 0, 0, 1], [0.5, 0, 0.5, 1],
+    [0.95, 0, 1, 1], [1, 1, 1, 1]], "gradation": true};
+papaya.viewer.ColorTable.TABLE_DTI_SPECTRUM = {"name": "Spectrum", "data": [[0, 1, 0, 0], [0.5, 0, 1, 0], [1, 0, 0, 1]],
+    "gradation": true};
+
+
+
+
+<!-- If you don't specify height and width for the papyaya container, it defaults to full screen -->

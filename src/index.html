@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="node_modules/webix/webix.css" type="text/css" charset="utf-8">
+    <script src="node_modules/webix/webix.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="src/papaya.js"></script>
+    <script type="text/javascript" src="src/sampleDataSets.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/papaya.css" />
+    <script type="text/javascript" src="node_modules/jquery/dist/jquery.js"></script>
+    <title>webix Papaya Viewer Integration</title>
+</head>
+
+<body>
+    <script>
+        /*This will need some work, but this allows me to create a new papaya viewer while using webix to control location by creating a prototype */
+    webix.protoUI({
+name: "webixPapaya",
+$init: function(config) {
+this.$view.innerHTML = "<div class='papaya' data-params='params'>";
+    },
+    defaults: {
+    width: 800, //ideally these are dynamic
+    height: 800
+    }
+    }, webix.ui.view);
+    //this will be moved to a combo box or config at some point.. these are predefined color tables
+    var papayaColorTables = ["Grayscale", "Spectrum", "Overlay (Positives)", "Overlay (Negatives)", "Hot-and-Cold", "Gold", "Red Overlay", "Green Overlay", "Blue Overlay"]
+    //papaya.Container.startPapaya() <<< THIS ALSO NEEDS TO RUN AFTER CREATING THE DIV var leftPanel={ rows: [{ view: "template" , template: "TopPanel" }, { view: "template" , template: "MaskImagePanel" } ]}
+
+var leftPanel = {
+    rows: [
+        { view: "template", template: "Controls" },
+        
+    ], gravity:0.1
+}
+
+var middlePanel = { view:"webixPapaya"}   
+
+  var baseImageControls = {
+        rows: [
+        {
+        view: "slider",
+        label: "baseImgSlider",
+        value: "20",
+        min: 0,
+        max: 1,
+        step: 0.05,
+        labelWidth: 200,
+        name: "s1",
+        on: {
+        "onChange": function(newv, oldv) {
+        //so the volId refers to the order it's on the
+            papayaContainers[0].viewer.screenVolumes[0].alpha = newv;
+                papayaContainers[0].viewer.drawViewer(true, false);
+
+                            }
+            }       
+        },
+               {
+            view: "combo",
+            label: "baseImgColorTable",
+            options: papayaColorTables,
+            on: {
+                "onChange": function(newv, oldv) {
+                    webix.message(newv);
+
+                    myViewer = papayaContainers[0].viewer;
+                    //To Do.... Unclear why I need to pass myViewer to this
+                    papayaContainers[0].viewer.screenVolumes[0].changeColorTable(myViewer, newv)
+                }
+            }
+        },
+        ]}
+
+
+var firstOverlayControls = {
+        rows: [
+        {
+        view: "slider",
+        label: "baseImgSlider",
+        value: "20",
+        min: 0,
+        max: 1,
+        step: 0.05,
+        labelWidth: 200,
+        name: "s2",//name should change
+        on: {
+        "onChange": function(newv, oldv) {
+        //so the volId refers to the order it's on the
+        //the volID 
+            papayaContainers[0].viewer.screenVolumes[1].alpha = newv;
+                papayaContainers[1].viewer.drawViewer(true, false);
+
+                            }
+            }       
+        },
+               {
+            view: "combo",
+            label: "baseImgColorTable",
+            options: papayaColorTables,
+            on: {
+                "onChange": function(newv, oldv) {
+                    webix.message(newv);
+
+                    myViewer = papayaContainers[0].viewer;
+                    //To Do.... Unclear why I need to pass myViewer to this
+                    papayaContainers[0].viewer.screenVolumes[1].changeColorTable(myViewer, newv)
+                }
+            }
+        },
+        ]}
+
+
+
+var secondOverlayCtrls = {
+        rows: [
+        {
+        view: "slider",
+        label: "baseImgSlider",
+        value: "20",
+        min: 0,
+        max: 1,
+        step: 0.05,
+        labelWidth: 200,
+        name: "s2",//name should change
+        on: {
+        "onChange": function(newv, oldv) {
+        //so the volId refers to the order it's on the
+        //the volID 
+            papayaContainers[0].viewer.screenVolumes[2].alpha = newv;
+                papayaContainers[1].viewer.drawViewer(true, false);
+
+                            }
+            }       
+        },
+               {
+            view: "combo",
+            label: "baseImgColorTable",
+            options: papayaColorTables,
+            on: {
+                "onChange": function(newv, oldv) {
+                    webix.message(newv);
+
+                    myViewer = papayaContainers[0].viewer;
+                    //To Do.... Unclear why I need to pass myViewer to this
+                    papayaContainers[0].viewer.screenVolumes[2].changeColorTable(myViewer, newv)
+                }
+            }
+        },
+        ]}
+
+
+
+var rightPanel = {
+    rows: [
+        { type: "header", template: "Viewer Controls" },
+        { type: "header", template: "ControlSet1"},
+        baseImageControls,
+        { type: "header", template: "OverlayControls1"},
+
+
+        firstOverlayControls
+        { type: "header", template: "OverlayControls2"},
+        secondOverlayControls
+
+        
+    ]
+}
+
+var  layout = { cols: [ leftPanel, {view:"resizer"},
+                middlePanel, rightPanel]}
+
+
+                //For now I am going to hard code some sample Images to render...
+
+    var params = [];
+    //I need to keep abstracting this... the lut/min/max can be inferred from the 
+    //imageType
+    mainImg = sampleDataSets["MNI_1mm"][0]["path"];
+    maskImg = sampleDataSets["MNI_1mm"][1]["path"];
+    secondMaskImg = sampleDataSets["MNI_1mm"][3]["path"];
+
+    params[maskImg] = {
+        "min": 0,
+        "max": 10,
+        "lut": "Fire"
+    };
+
+    params[secondMaskImg] = {
+        "min": 0,
+        "max": 2,
+        "lut": "Blue Overlay"
+    };
+ params["images"] = [mainImg, maskImg, secondMaskImg];
+
+ 
+
+
+
+webix.ready(function() {
+        webix.ui(layout);
+     papaya.Container.startPapaya() //Because of the way we insert the papaya to the DOM, we need to call this to initialize it
+    $(".papaya-main-swap").click(function() {
+         papaya.viewer.Viewer.prototype.rotateViews();
+     });
+    
+
+    })
+
+
+    </script>
+    <button id="swap-slice" class="papaya-main-swap" type="button" style="display: block; top: 475px; left: 700px; position: relative;">Swap Main Slice</button>
+    <script>
+    //  $(document).ready(function() {
+
+
+
+
+
+    // papayaContainers[0].viewer.screenVolumes[1].changeColorTable(myViewer ,"Green Overlay")
+    //     papayaContainers[0].viewer.toggleOverlay(1)
+
+
+    // 
+
+
+    //look into passing different sets of params to each viewer on creation...
+
+    //I am manually adding two sets of controls, long term I want this to be dynamically added  
+
+
+    //                 {
+    //                     view: "slider",
+    //                     label: "maskOneImgSlider",
+    //                     value: "0.5",
+    //                     min: 0,
+    //                     max: 1,
+    //                     step: 0.05,
+    //                     name: "s2",
+    //                     on: {
+    //                         "onChange": function(newv, oldv) {
+    //                             //so the volId refers to the order it's on the 
+    //                             papayaContainers[0].viewer.screenVolumes[1].alpha = newv;
+    //                             papayaContainers[0].viewer.drawViewer(true, false);
+    //                         }
+    //                     }
+
+    //                 },
+    //                 {
+    //                     view: "combo",
+    //                     label: "maskImgColorTable",
+    //                     options: papayaColorTables,
+    //                     on: {
+    //                         "onChange": function(newv, oldv) {
+    //                             webix.message(newv);
+
+    //                             myViewer = papayaContainers[0].viewer;
+    //                             //To Do.... Unclear why I need to pass myViewer to this
+    //                             papayaContainers[0].viewer.screenVolumes[1].changeColorTable(myViewer, newv)
+
+    //                         }
+    //                     }
+
+    //                 },
+
+    //                 {
+    //                     view: "slider",
+    //                     label: "maskTwoImgSlider",
+    //                     value: "0.5",
+    //                     min: 0,
+    //                     max: 1,
+    //                     step: 0.05,
+    //                     name: "s3",
+    //                     on: {
+    //                         "onChange": function(newv, oldv) {
+    //                             //so the volId refers to the order it's on the 
+    //                             papayaContainers[0].viewer.screenVolumes[2].alpha = newv;
+    //                             papayaContainers[0].viewer.drawViewer(true, false);
+    //                         }
+    //                     }
+
+    //                 },
+    //                 {
+    //                     view:"slider",
+    //                     label: "maskTwoMinMaskSlider",
+    //                     value: 1,
+    //                     min: 0,
+    //                     max:10,
+    //                     on:
+    //                         {
+    //                             "onChange": function(newv,oldv)
+    //                                 {
+    //                   papayaContainers[0].viewer.screenVolumes[2].screenMin =newv;
+    //                   papayaContainers[0].viewer.drawViewer(true, false);
+
+
+
+    //                                 }
+
+
+    //                         }
+    //                 },
+
+
+    //                 {
+    //                     view: "combo",
+    //                     label: "maskImgColorTable",
+    //                     inputWidth: 400,
+    //                     options: papayaColorTables,
+    //                     on: {
+    //                         "onChange": function(newv, oldv) {
+    //                             webix.message(newv);
+
+    //                             myViewer = papayaContainers[0].viewer;
+    //                             //To Do.... Unclear why I need to pass myViewer to this
+    //                             papayaContainers[0].viewer.screenVolumes[2].changeColorTable(myViewer, newv)
+
+    //                         }
+    //                     }
+    //                 },
+    //             ]
+    //         }
+    //     ]
+    // };
+
+
+    // screenMax: 8000
+    // screenMin: 3000
+    // screenRatio: 0.051
+
+
+    //screenMin and screenMax
+
+    // nii_layout = { cols: [leftPanel, rightPanel] }
+
+
+    //So workflow..
+    //              <<SCAN DIRECTORY>>
+    //  if you find a file_mask.nii.gz  it associates it with the parent file
+    //
+
+
+    //toggle palette.. toggle overlay toggle alpha...
+    //     papayaContainers[0].viewer.screenVolumes[1].changeColorTable(myViewer  ,"Green Overlay")
+
+    //     papayaContainers[0].viewer.toggleOverlay(1)
+
+    // papayaContainers[0].viewer.screenVolumes[1].alpha = 0.5;  // 0 to 1
+    // papayaContainers[0].viewer.drawViewer(true, false);
+
+
+
+    // <<< THIS ALSO NEEDS TO RUN AFTER CREATING THE DIV
+
+    //then add myanimation component to layout
+
+    //    $(document).ready(function() {
+    //      $(".papaya-main-swap").click(function() {
+    //        papaya.viewer.Viewer.prototype.rotateViews();
+    //  });
+    // });
+
+    //    var params = [];
+
+    // //https://stackoverflow.com/questions/33108712/papaya-dicom-image-viewer-swap-main-slice //https://stackoverflow.com/questions/32972955/papaya-viewer-command-to-view-next-slice //https://github.com/rii-mango/Papaya/wiki/Configuration //https://github.com/rii-mango/Papaya/wiki/How-To-Make-a-Context-Manager var params = []; // params["worldSpace"] = true;
+    //https://stackoverflow.com/questions/49766612/make-pagination-in-papaya-dicom-viewer-slices-using-javascript
+
+    // mainImg = "data/AYOTTE_KATIWOODY/axl-t2_Beagle_WoodyAyotte_UGA3T_218038_AYOTTE_KATIWOODY_SCAN2.nii.gz";
+    // maskImg = "data/AYOTTE_KATIWOODY/axial_mask/laxl-t2_Beagle_WoodyAyotte_UGA3T_218038_AYOTTE_KATIWOODY_SCAN2_axialmask.nii.gz";
+
+    // secondMaskImg = "data/AYOTTE_KATIWOODY/axial_mask/laxl-t2_Beagle_WoodyAyotte_UGA3T_218038_AYOTTE_KATIWOODY_SCAN2_axialmask.nii.gz";
+
+
+
+    // params["laxl-t2_Beagle_WoodyAyotte_UGA3T_218038_AYOTTE_KATIWOODY_SCAN2_axialmask.nii.gz"] = {
+    //     "min": 0,
+    //     "max": 10,
+    //     "lut": "Fire"
+    // };
+
+    // params["images"] = [mainImg, maskImg];
+    // //look into passing different sets of params to each viewer on creation...
+
+    // var layout = {
+    //     container: "main_layout",
+    //     cols: [
+    //         { view: "webixPapaya", id:"view1" },
+    //         { view: "webixPapaya", id:"view2" },
+    //         { view: "template", template:"Place Controls here"}
+    //     ]
+    // };
+
+    // nii_layout = { cols: [leftPanel, rightPanel] }
+    //   webix.ready(function() {
+    //        webix.ui(layout);
+
+    // papaya.Container.startPapaya()
+
+
+
+    //   })
+
+
+    //So workflow..
+    //              <<SCAN DIRECTORY>>
+    //  if you find a file_mask.nii.gz  it associates it with the parent file
+    //
+    // $("#areaA").addClass("papaya") // })
+
+
+    // params = ['images', 'showControls', 'showControlBar', 'orthogonal', 'smoothDisplay', 'coordinate'];
+    // params['images'] = [pathImg];
+    // params['orthogonal'] = false;
+    // params['smoothDisplay'] = false;
+    // params['showControlBar'] = false;
+    // params['showControls'] = false;
+    // params.loadingComplete = () => {
+    // this.startPapaya();
+    // };
+
+    // papayaContainers[0].viewer.toggleOverlay(1)  <<< TO DO >>>
+    </script>
+</body>
+
+</html>
