@@ -14,3 +14,11 @@ This will install webpack, webpack-cli and a dev-server for testing
     npm i webpack-cli --save-dev
     npm i webpack-dev-server --save-dev
     npm i html-webpack-plugin html-loader --save-dev
+
+
+
+To start the actual app as a dev service, run
+
+  npm run start
+
+This should start up a development server and allow you to start hacking
