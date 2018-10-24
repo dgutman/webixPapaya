@@ -293,3 +293,44 @@ papaya.viewer.ColorTable.TABLE_DTI_SPECTRUM = {"name": "Spectrum", "data": [[0, 
 
 
 <!-- If you don't specify height and width for the papyaya container, it defaults to full screen -->
+
+
+Now, i have some coordinates like [{x: 10, y: 50}, {x: 50, y: 50}, {x: 50, y: 100}, {x:10,y: 50}].
+and these coordinates are relative to the source dicom's position.
+
+when I set params['radiological'] = true.
+and i add a prototype function like:
+
+papaya.viewer.Viewer.prototype.translateCoordinate = function (coordinate, type) {
+if (type == 'x') {
+return (this.axialSlice.finalTransform[0][2] + (coordinate + 0.5) * this.axialSlice.finalTransform[0][0])
+} else {
+return (this.axialSlice.finalTransform[1][2] + (coordinate + 0.5) * this.axialSlice.finalTransform[1][1])
+}
+}
+
+
+ params = ['images', 'showControls', 'showControlBar', 'orthogonal', 'smoothDisplay', 'coordinate'];
+    params['images'] = [pathImg];
+    params['orthogonal'] = false;
+    params['smoothDisplay'] = false;
+    params['showControlBar'] = false;
+    params['showControls'] = false;
+    params.loadingComplete = () => {
+      this.startPapaya();
+    };
+
+    let a = 0;
+    while (2 > a) {
+      papaya.Container.addViewer(a, params);
+      a++;
+    }
+this is draw rect part code:
+
+context.lineWidth = 1
+context.moveTo(that.translateCoordinate(rect[0].x, 'x'), that.translateCoordinate(rect[0].y, 'y'))
+arr.forEach(function (item) {
+context.lineTo(that.translateCoordinate(item[0], 'x'), that.translateCoordinate(item[1], 'y'))
+})
+context.closePath()
+context.stroke()

@@ -13,147 +13,174 @@
 
 <body>
     <script>
-        /*This will need some work, but this allows me to create a new papaya viewer while using webix to control location by creating a prototype */
+    /*This will need some work, but this allows me to create a new papaya viewer while using webix to control location by creating a prototype */
     webix.protoUI({
-name: "webixPapaya",
-$init: function(config) {
-this.$view.innerHTML = "<div class='papaya' data-params='params'>";
-    },
-    defaults: {
-    width: 800, //ideally these are dynamic
-    height: 800
-    }
+        name: "webixPapaya",
+        $init: function(config) {
+            this.$view.innerHTML = " <div class='papaya' data-params='params'><button id='swap-slice' class='papaya-main-swap' type='button' style='display: block; top: 500px; left: 700px; position: relative;''>Swap Main Slice</button></div>";
+        },
+        defaults: {
+            width: 800, //ideally these are dynamic
+            height: 800
+        }
     }, webix.ui.view);
     //this will be moved to a combo box or config at some point.. these are predefined color tables
     var papayaColorTables = ["Grayscale", "Spectrum", "Overlay (Positives)", "Overlay (Negatives)", "Hot-and-Cold", "Gold", "Red Overlay", "Green Overlay", "Blue Overlay"]
-    //papaya.Container.startPapaya() <<< THIS ALSO NEEDS TO RUN AFTER CREATING THE DIV var leftPanel={ rows: [{ view: "template" , template: "TopPanel" }, { view: "template" , template: "MaskImagePanel" } ]}
 
-var leftPanel = {
-    rows: [
-        { view: "template", template: "Controls" },
-        
-    ], gravity:0.1
-}
-
-var middlePanel = { view:"webixPapaya"}   
-
-  // var baseImageControls = {
-  //       rows: [
-  //       {
-  //       view: "slider",
-  //       label: "baseImgSlider",
-  //       value: "20",
-  //       min: 0,
-  //       max: 1,
-  //       step: 0.05,
-  //       labelWidth: 200,
-  //       name: "s1",
-  //       on: {
-  //       "onChange": function(newv, oldv) {
-  //       //so the volId refers to the order it's on the
-  //           papayaContainers[0].viewer.screenVolumes[0].alpha = newv;
-  //               papayaContainers[0].viewer.drawViewer(true, false);
-
-  //                           }
-  //           }       
-  //       },
-  //              {
-  //           view: "combo",
-  //           label: "baseImgColorTable",
-  //           labelWidth: 2000,
-  //           options: papayaColorTables,
-  //           on: {
-  //               "onChange": function(newv, oldv) {
-  //                   webix.message(newv);
-
-  //                   myViewer = papayaContainers[0].viewer;
-  //                   //To Do.... Unclear why I need to pass myViewer to this
-  //                   papayaContainers[0].viewer.screenVolumes[0].changeColorTable(myViewer, newv)
-  //               }
-  //           }
-  //       },
-  //       ]}
-
-
-        function generateMaskControls( viewerId, imageId, imgName )
-            {
-                /* This will build a webix view to manipulate an image in papaya
-                viewerId refers to the papayaViewer number, this starts at 0, but you can have multiple viewers in the same web page
-                imageId refers to the layer, 0 is the base image, and then each additional overlay image goes from there, this is one of the things I need to sync*/
-
-
-return {
+    var leftPanel = {
         rows: [
-        {
-            type:"header", template: imgName
+            { view: "template", template: "Controls" },
+
+        ],
+        gravity: 0.1
+    }
+
+    var middlePanel = { view: "webixPapaya" }
 
 
-        },
+    function generateMaskControls(viewerId, imageId, imgName) {
+        /* This will build a webix view to manipulate an image in papaya
+        viewerId refers to the papayaViewer number, this starts at 0, but you can have multiple viewers in the same web page
+        imageId refers to the layer, 0 is the base image, and then each additional overlay image goes from there, this is one of the things I need to sync*/
 
 
-        {
-        view: "slider",
-        label: "opacity",
-        value: "1",
-        min: 0,
-        max: 1,
-        step: 0.05,
-        labelWidth: 200,
-        inputWidth: 350,
-        name: "s2",
-        on: {
-        "onChange": function(newv, oldv) {
-            papayaContainers[viewerId].viewer.screenVolumes[imageId].alpha = newv;
-                papayaContainers[viewerId].viewer.drawViewer(true, false);
+        //Dimitry--- Need help with UI/layout for this control
 
+        var imgCtrView =
+
+            {
+                rows: [{
+                        type: "header",
+                        template: imgName
+                    },
+                    {
+                        cols: [{
+                                view: "switch",
+                                value: 1,
+                                label: "Visible",
+                                onLabel: "on",
+                                offLabel: "off",
+                                on: {
+                                    onChange: function(newv, oldv) {
+                                        webix.message("value toggled");
+                                        console.log("switch clickd")
+                                        papayaContainers[viewerId].viewer.toggleOverlay(imageId)
+
+                                    }
+                                }
+                            }, //toggle on/off the individual layer
+                            {
+                                view: "slider",
+                                label: "opacity",
+                                value: "1",
+                                min: 0,
+                                max: 1,
+                                step: 0.05,
+                                labelWidth: 100,
+                                inputWidth: 250,
+                                name: "s2",
+                                on: {
+                                    "onChange": function(newv, oldv) {
+                                        papayaContainers[viewerId].viewer.screenVolumes[imageId].alpha = newv;
+                                        papayaContainers[viewerId].viewer.drawViewer(true, false);
+                                    }
+                                }
                             }
-            }       
-        },
-               {
-            view: "combo",
-            label: "LUT",
-            //autowidth:true,//why does this screw it up so bad!
-            labelWidth: 250,
-            inputWidth: 400,
-            options: papayaColorTables,
-            on: {
-                "onChange": function(newv, oldv) {
-                    webix.message(newv);
-                    myViewer = papayaContainers[viewerId].viewer;
-                    //To Do.... Unclear why I need to pass myViewer to this
-                    papayaContainers[viewerId].viewer.screenVolumes[imageId].changeColorTable(myViewer, newv)
-                }
+                        ]
+                    },
+                    {
+                        view: "combo",
+                        label: "LUT",
+                        //autowidth:true,//why does this screw it up so bad!
+                        labelWidth: 250,
+                        inputWidth: 400,
+                        options: papayaColorTables,
+                        on: {
+                            "onChange": function(newv, oldv) {
+                                webix.message(newv);
+                                myViewer = papayaContainers[viewerId].viewer;
+                                //To Do.... Unclear why I need to pass myViewer to this
+                                papayaContainers[viewerId].viewer.screenVolumes[imageId].changeColorTable(myViewer, newv)
+                            }
+                        }
+                    },
+                    {
+                        //trying to make a control where rI can set min and max as inputs but also have a slider
+
+                        cols: [{
+                                view: "counter",
+                                label: "min",
+                                step: 1,
+                                value: 0,
+                                min: 0,
+                                max: 10000,
+                                on: {
+                                    onChange: function(newv, oldv) {
+                                        ///need to change the screen min if this chnages
+                                        papayaContainers[viewerId].viewer.screenVolumes[imageId].screenMin = newv;
+                                        papayaContainers[0].viewer.drawViewer(true, false);
+                                        //TO DO, maybe think about adding ability to change the step value dynamically
+                                        //or somehow scale it
+                                    }
+                                }
+                            },
+                            { view: "slider", 
+                            	id: "imgMinMaxSldr"+ imageId,	
+                            	min: 0,
+                            	max: 500,
+                            	on:
+                            		{
+                            			onChange: function(newv,oldv)
+                            					{
+                            						webix.message("Sliding around")
+                            		//this is not correct behavior the slider... but ill have to figure it out
+                                    papayaContainers[viewerId].viewer.screenVolumes[imageId].screenMin = newv;
+                                    papayaContainers[0].viewer.drawViewer(true, false);
+                            					}
+                            		}
+                             }, ///the min and max of this should be set or updatable be below
+                            {
+                                view: "counter",
+                                label: "max",
+                                step: 0.5,
+                                value: 30,
+                                on: {
+                                    onChange: function(newv, oldv) {
+                                        papayaContainers[viewerId].viewer.screenVolumes[imageId].screenMax = newv;
+                                        //need to figure out how to also set max for the range slider
+                                        papayaContainers[0].viewer.drawViewer(true, false);
+                                    }
+
+                                }
+                            }
+                        ]
+                    },
+                ]
             }
-        },
-        ]}
+        return imgCtrView
+    }
 
-            }
+    var baseImageControls = generateMaskControls(0, 0, 'baseImage');
+    var firstOverlayControls = generateMaskControls(0, 1, 'firstOverlay')
+    var secondOverlayControls = generateMaskControls(0, 2, 'secondOverlay')
 
+    var rightPanel = {
+        rows: [
+            baseImageControls,
+            firstOverlayControls,
+            secondOverlayControls
+        ],
+        gravity: 0.2
+    }
 
- var baseImageControls = generateMaskControls(0,0,'baseImage');
-
-
-var firstOverlayControls = generateMaskControls(0,1,'firstOverlay')
-var secondOverlayControls = generateMaskControls(0,2,'secondOverlay')
-
-
- // /{"min": 4, "max": 8, "lut": "Red Overlay"};
-
-
-
-var rightPanel = {
-    rows: [
-        baseImageControls,
-        firstOverlayControls,
-        secondOverlayControls
-    ], gravity:0.2
-}
-
-var  layout = { cols: [ leftPanel, {view:"resizer"},
-                middlePanel, rightPanel]}
+    var layout = {
+        cols: [leftPanel, { view: "resizer" },
+            middlePanel, rightPanel
+        ]
+    }
 
 
-                //For now I am going to hard code some sample Images to render...
+    //For now I am going to hard code some sample Images to render...
 
     var params = [];
     //I need to keep abstracting this... the lut/min/max can be inferred from the 
@@ -162,12 +189,11 @@ var  layout = { cols: [ leftPanel, {view:"resizer"},
     maskImg = sampleDataSets["MNI_1mm"][1]["path"];
     secondMaskImg = sampleDataSets["MNI_1mm"][3]["path"];
 
- params["images"] = [mainImg, maskImg, secondMaskImg];
+    params["images"] = [mainImg, maskImg, secondMaskImg];
 
 
-
- //NUTS--- so the images array needs the full file path, but the
- //params below just needs the specific file name..
+    //NUTS--- so the images array needs the full file path, but the
+    //params below just needs the specific file name..
 
     params[maskImg] = {
         "screenMin": 1,
@@ -182,38 +208,24 @@ var  layout = { cols: [ leftPanel, {view:"resizer"},
         "screenMax": 2,
         "min": 0,
         "max": 2,
-        
         "lut": "Green Overlay"
     };
- 
 
 
-
-webix.ready(function() {
+    webix.ready(function() {
         webix.ui(layout);
-     papaya.Container.startPapaya() //Because of the way we insert the papaya to the DOM, we need to call this to initialize it
-    $(".papaya-main-swap").click(function() {
-         papaya.viewer.Viewer.prototype.rotateViews();
-     });
-    
-
+        papaya.Container.startPapaya() //Because of the way we insert the papaya to the DOM, we need to call this to initialize it
+        // $(".papaya-main-swap").click(function() {
+        //     papaya.viewer.Viewer.prototype.rotateViews();
+        // });
     })
 
 
-    </script>
-    <button id="swap-slice" class="papaya-main-swap" type="button" style="display: block; top: 475px; left: 700px; position: relative;">Swap Main Slice</button>
-    <script>
-    // params = ['images', 'showControls', 'showControlBar', 'orthogonal', 'smoothDisplay', 'coordinate'];
-    // params['images'] = [pathImg];
-    // params['orthogonal'] = false;
-    // params['smoothDisplay'] = false;
-    // params['showControlBar'] = false;
-    // params['showControls'] = false;
-    // params.loadingComplete = () => {
-    // this.startPapaya();
-    // };
-
-    // papayaContainers[0].viewer.toggleOverlay(1)  <<< TO DO >>>
+    // $(document).ready(function(){
+    //        $(".papaya-main-swap").click(function(){
+    //            papaya.viewer.Viewer.prototype.rotateViews();
+    //        });
+    //    });
     </script>
 </body>
 
