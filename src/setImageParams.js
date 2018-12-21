@@ -15,14 +15,14 @@ function setImageParams(params) {
             maskFilename= imageName.substring(imageName.lastIndexOf('/')+1); // remove directory path
             params[maskFilename] = {     
                 "min": 0,
-                "max": 1,
+                "max": 1, // binary mask
                 "lut":"Greyscale",
                 "alpha": 0.5,
                 "visible": 1,
             };
         }
         else {
-            nonMaskFilename= imageName.substring(imageName.lastIndexOf('/')+1);
+            nonMaskFilename= imageName.substring(imageName.lastIndexOf('/')+1); 
             params[nonMaskFilename]={}
             params[nonMaskFilename]["min"]=0;
             params[nonMaskFilename]["max"]=10000; // Non-masks go to 10,000

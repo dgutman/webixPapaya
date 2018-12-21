@@ -1,5 +1,4 @@
 // Webix Layout:
-
 function setupPanels(params) {
     console.log("setupPanels");
 
@@ -12,7 +11,8 @@ function setupPanels(params) {
     // Webix Panels:
     var leftPanel = {
         rows: [
-            { view: "template", template: "Info", width: 300, height: 50, type:"header"}, // text
+            { view: "template", template: "Info", width: 500, height: 50, type:"header"}, // text
+            { view:"list", data:params["images"] },
         ],
     };
 
@@ -23,10 +23,21 @@ function setupPanels(params) {
         ] 
     };
 
+    // Initial values for controls:
     var layerN= 0; // image index
     var imageName= params["images"][layerN]; // image path
     var imageName= imageName.substring(imageName.lastIndexOf('/')+1); // image filename
     var imageValues= params[imageName]; // parameters for image
+
+    // Image names without directory paths:
+    var imageNameList= [];
+    for(i in params["images"]){
+        // skip loop if the property is from prototype, otherwise will print extra items:
+        if (!params["images"].hasOwnProperty(i)) continue;
+        tempName= params["images"][parseInt(i)];
+        tempName= tempName.substring(tempName.lastIndexOf('/')+1)
+        imageNameList.push(tempName);
+    }
 
     var rightPanel = { 
         rows: [
@@ -34,11 +45,8 @@ function setupPanels(params) {
             { view:"combo", id:"layerCBox" ,label:"Layer", options:["0","1","2"], value:"0",
                 on: {
                     onChange: function(newv, oldv) {
-                        //console.log(`switch: from: ${oldv} to: ${newv}`);
                         layerN= parseInt(newv); // image index
-                        imageName= params["images"][layerN];
-                        imageName= imageName.substring(imageName.lastIndexOf('/')+1);
-                        imageValues= params[imageName];
+                        imageValues= params[imageNameList[layerN]];
                         $$("colorCBox").setValue( imageValues["lut"]); 
                         $$("visibilitySwitch").setValue( imageValues["visible"]); 
                         $$("alphaCounter").setValue(imageValues["alpha"]); 
@@ -53,53 +61,63 @@ function setupPanels(params) {
                 on: {
                     onItemClick: function(newv, oldv) {
                         console.log(`switch: from: ${oldv} to: ${newv}`);
-                        layerN= parseInt($$("layerCBox").getInputNode().value );
+                        layerN= parseInt($$("layerCBox").getInputNode().value ); // Obtain current layer int from layerCBox
                         papayaContainers[0].viewer.toggleOverlay(layerN);
-                        // save visibility status:
-                        imageName= params["images"][layerN];
-                        imagePath= imageName.substring(imageName.lastIndexOf('/')+1);
-                        if( params[imagePath]["visible"] == 1){params[imagePath]["visible"]=0;} // change params["imagePath"]["visible"] to save visibility state
-                        else {params[imagePath]["visible"]=1;}
+                        imageName= imageNameList[layerN];
+                        if( params[imageName]["visible"] == 1){params[imageName]["visible"]=0;} // change params["imageName"]["visible"] to save visibility state
+                        else {params[imageName]["visible"]=1;}
                     }, // onChange
                 }, // on event
             }, // switch
             { view:"combo", id:"colorCBox", label:"Color", options: papayaColorTables, value:imageValues["lut"],
                 on: {
                     onChange: function(newv, oldv) {
-                        layerN= parseInt($$("layerCBox").getInputNode().value );
+                        layerN= parseInt($$("layerCBox").getInputNode().value ); // Obtain current layer int from layerCBox
                         myViewer = papayaContainers[0].viewer;
                         papayaContainers[0].viewer.screenVolumes[layerN].changeColorTable(myViewer, newv);
+                        params[imageNameList[layerN]]["lut"]= newv; // save new value to params
                     }, // onChange
                 }, // on event
             }, // combobox
             { view:"counter", id:"alphaCounter", label:"Alpha", min:0, max:1, step:0.05, value:imageValues["alpha"],
                 on: {
                     onChange: function(newv, oldv) {
-                        layerN= parseInt($$("layerCBox").getInputNode().value );
+                        layerN= parseInt($$("layerCBox").getInputNode().value ); // Obtain current layer int from layerCBox
                         papayaContainers[0].viewer.screenVolumes[layerN].alpha = newv;
                         papayaContainers[0].viewer.drawViewer(true, false);
-                        //$$("alphaTemplate").getNode().innerText= "Alpha Value: "+newv;
+                        params[imageNameList[layerN]]["alpha"]= newv; // save new value to params
                     }, // onChange
                 }, // on event
             }, // counter
             { view:"counter", id:"minCounter", label:"Min", min:0, max:10000, step:0.05, value:imageValues["min"],
                 on: {
                     onChange: function(newv, oldv) {
-                        layerN= parseInt($$("layerCBox").getInputNode().value );
+                        layerN= parseInt($$("layerCBox").getInputNode().value ); // Obtain current layer int from layerCBox
                         papayaContainers[0].viewer.screenVolumes[layerN].screenMin = newv;
                         papayaContainers[0].viewer.drawViewer(true, false);
+                        params[imageNameList[layerN]]["min"]= newv; // save new value to params
                     }, // onChange
                 }, // on event
             }, // counter
             { view:"counter", id:"maxCounter", label:"Max", min:0, max:10000, step:0.05, value:imageValues["max"],
                 on: {
                     onChange: function(newv, oldv) {
-                        layerN= parseInt($$("layerCBox").getInputNode().value );
+                        layerN= parseInt($$("layerCBox").getInputNode().value ); // Obtain current layer int from layerCBox
                         papayaContainers[0].viewer.screenVolumes[layerN].screenMax = newv;
                         papayaContainers[0].viewer.drawViewer(true, false);
+                        params[imageNameList[layerN]]["max"]= newv; // save new value to params
                     }, // onChange
                 }, // on event
             }, // counter
+            { view:"button", id:"swapViewsButton", value:"Swap Views",
+                click: function() { papayaContainers[0].viewer.rotateViews() }
+            }
+            // papayaContainers[0].viewer.goToInitialCoordinate() // resets coordinate marker
+            // papayaContainers[0].viewer.currentCoord // outputs marker coordinates
+            // papayaContainers[0].viewer.cursorPosition // outputs mouse coordinates
+            // papayaContainers[0].viewer.currentScreenVolume // Gives current layer info
+            // papayaContainers[0].viewer.setZoomFactor(2) // Zoom in
+            // papayaContainers[0].viewer.getZoomString() // how much image is zoomed
         ], // Rows
     }; 
 
