@@ -1,5 +1,5 @@
 {
-  "name": "webixpapaya_fg",
+  "name": "webixpapaya",
   "version": "1.0.0",
   "description": "Runs papaya nifti viewer with webix ui",
   "main": "index.js",
@@ -18,5 +18,13 @@
     "viewer"
   ],
   "author": "David Gutman, Felipe Giuste",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fgiuste7/webixPapaya.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fgiuste7/webixPapaya/issues"
+  },
+  "homepage": "https://github.com/fgiuste7/webixPapaya#readme"
 }
