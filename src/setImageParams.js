@@ -30,7 +30,7 @@ function setImageParams(params) {
                 params[nonMaskFilename]["lut"]="Fire";
                 params[nonMaskFilename]["alpha"]=1;
                 params[nonMaskFilename]["visible"]=1;
-                nonMaskImages=1;
+                nonMaskImages+=1;
                 
             }
             else{
