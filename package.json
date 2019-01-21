@@ -4,6 +4,7 @@
   "description": "Runs papaya nifti viewer with webix ui",
   "main": "index.js",
   "dependencies": {
+    "http-server": "^0.11.1",
     "webix": "^6.0.9"
   },
   "devDependencies": {},
