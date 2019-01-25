@@ -211,8 +211,11 @@ async function get_file_ID(file_name, folder_id) {
 
     // resolve promise within async function:
     let result = await output;
-    console.log(result[0]);
-    let ID = result['_id']
-    console.log(`ID: ${result[0]['_id']}`);
+    if (!result[0]) {
+        console.log(`Find file: ${file_name} \tUnsuccessful`);
+        return '';
+    }
+    let ID = result[0]['_id']
+    //console.log(`ID: ${ID}`);
     return ID;
 }
