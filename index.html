@@ -90,9 +90,8 @@
                     });
                 }).then(function (data) { // Promise.then()
                     return JSZip.loadAsync(data); // loads data into new JSZip object
-                }).then(function (zData) {
+                }).then(function (zData) { // zData is resolved promise
                     DCMZipFile = zData;
-                    //add any stuff that should happen once the zData exists..
                     DCMZipFile.folder("13-AX T1 POST-19694").forEach(function (relativePath, file) {
                         console.log("iterating over", relativePath);
                         console.log(file);
