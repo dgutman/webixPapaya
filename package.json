@@ -4,7 +4,12 @@
   "description": "Runs papaya nifti viewer with webix ui",
   "main": "index.js",
   "dependencies": {
+    "bowser": "^2.1.0",
     "http-server": "^0.11.1",
+    "jszip": "^3.1.5",
+    "jszip-utils": "0.0.2",
+    "requirejs": "^2.3.6",
+    "webix": "^6.1.5"
   },
   "devDependencies": {},
   "scripts": {
