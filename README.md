@@ -2,23 +2,33 @@
 Integration Demo using Papaya.js and Webix
 
 
-#### Getting started
+## Getting started
 
-See notes.txt for various web pages I followed for this.  I am using node and webpack
-for this, so you need to have nodejs and npm installed.
+### Installing node through nvm (node version manager):
+* https://github.com/creationix/nvm
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
 
-The basic packages you first need to run this are webpack, webpack-dev-server
+### Source nvm:
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-This will install webpack, webpack-cli and a dev-server for testing
-    npm i webpack --save-dev
-    npm i webpack-cli --save-dev
-    npm i webpack-dev-server --save-dev
-    npm i html-webpack-plugin html-loader --save-dev
+### install node using nvm:
+nvm install stable
 
+### install npm and nodejs:
+* https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions
+wget -qO- https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt-get install nodejs
 
+### initialize repo (within repository):
+npm init
 
-To start the actual app as a dev service, run
+### install webix with npm:
+npm install --save webix
 
-  npm run start
+### install jquery with npm:
+npm install --save jquery
 
-This should start up a development server and allow you to start hacking
+### Run app (within githib repository):
+http-server -a localhost -p 8080 -c-1
