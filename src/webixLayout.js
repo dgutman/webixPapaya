@@ -42,7 +42,7 @@ function setupPanels(params) {
     var rightPanel = { 
         rows: [
             { view:"template", template:"Controls", height:50, type:"header"}, // text
-            { view:"combo", id:"layerCBox" ,label:"Layer", options:["0","1","2"], value:"0",
+            { view:"combo", id:"layerCBox" ,label:"Layer", inputWidth: 250, options:["0","1","2"], value:"0",
                 on: {
                     onChange: function(newv, oldv) {
                         layerN= parseInt(newv); // image index
@@ -69,7 +69,7 @@ function setupPanels(params) {
                     }, // onChange
                 }, // on event
             }, // switch
-            { view:"combo", id:"colorCBox", label:"Color", options: papayaColorTables, value:imageValues["lut"],
+            { view:"combo", id:"colorCBox", label:"Color", inputWidth: 250, options: papayaColorTables, value:imageValues["lut"],
                 on: {
                     onChange: function(newv, oldv) {
                         layerN= parseInt($$("layerCBox").getInputNode().value ); // Obtain current layer int from layerCBox
@@ -109,7 +109,7 @@ function setupPanels(params) {
                     }, // onChange
                 }, // on event
             }, // counter
-            { view:"button", id:"swapViewsButton", value:"Swap Views",
+            { view:"button", id:"swapViewsButton", inputWidth: 250, value:"Swap Views",
                 click: function() { papayaContainers[0].viewer.rotateViews() }
             }
             // papayaContainers[0].viewer.goToInitialCoordinate() // resets coordinate marker

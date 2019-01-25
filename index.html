@@ -39,24 +39,35 @@
     <script>
         console.log("Start");
 
-        /*         { // Girder API Block
-                    set_girderUrl('http://candygram.neurology.emory.edu:8080');
-                    set_collectionId("5c48db6de62914004de6350f");
-                    set_folderId('5c49e88de62914004ded6b45');
+        { // Girder API Block
+            set_girderUrl('http://candygram.neurology.emory.edu:8080');
+            set_collectionId("5c48db6de62914004de6350f");
+            set_folderId('5c49e88de62914004ded6b45');
+            set_fileId('5c4b3d52e62914004df6fd08');
 
-                    // placeholder will update once promise is fullfilled; until then, it remains a pleasent greeting.
-                    var placeholder = 'hello';
-                    var fetch_response = get_collection_ID(collection_name = 'FG').then(function (x) {
-                        set_collectionId(x);
-                        placeholder = x;
-                    });
+            // placeholder will update once promise is fullfilled; until then, it remains a pleasent greeting.
+            var placeholder = 'hello';
 
-                    var fetch_response = create_folder(folder_name = 'testing', collection_id = get_collectionId()).then(
-                        function (x) {
-                            set_folderId(x);
-                            placeholder = x;
-                        });
-                } // END Girder API Block */
+            // Test get_collection_ID
+            get_collection_ID('FG')
+                .then(function (x) {
+                    set_collectionId(x);
+                    placeholder = x;
+                });
+            // Test post_folder
+            get_folder_ID('niftis', get_collectionId())
+                .then(function (x) {
+                    set_folderId(x);
+                    placeholder = x;
+                });
+
+            get_file_ID("set-0_tstat2.nii.gz", folder_id)
+                .then(function (x) {
+                    set_fileId(x);
+                    placeholder = x;
+                });
+
+        } // END Girder API Block
 
         // Papaya Viewer Parameters: Dictionary
         // Used in webixPapaya $init function
@@ -67,7 +78,7 @@
         params["showControlBar"] = false;
         params["showImageButtons"] = false;
 
-        var DCMZipFile; // DCM
+        var DCMZipFile = ''; // DCM
 
         // Run
         webix.ready(function () {
@@ -78,27 +89,29 @@
             papaya.Container.startPapaya();
 
             { // DCM Block
-                /* JSZipUtils.getBinaryContent: Description : Use an AJAX call to fetch a file (HTTP GET) on the server that served the file. 
-                Cross domain requests will work if the browser support them but only if the server send the right headers. 
-                This function doesn't follow redirects : currently only 200 OK are accepted. */
+                /* JSZipUtils.getBinaryContent: Description : Use an AJAX call to fetch a file (HTTP GET) on the server that served the file. */
                 myFileUrl =
                     "http://candygram.neurology.emory.edu:8080/api/v1/file/5c4b430ce62914004df6ff72/download"
                 myZipData = new JSZip.external.Promise(function (resolve, reject) { // new Promise
                     JSZipUtils.getBinaryContent(myFileUrl, function (err, data) { // AJAX GET: downloads file
-                        if (err) { reject(err); } 
-                        else { resolve(data); }
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(data);
+                        }
                     });
-                }).then(function (data) { // Promise.then()
+                }).then(function (data) { // myZipData.then()
                     return JSZip.loadAsync(data); // loads data into new JSZip object
                 }).then(function (zData) { // zData is resolved promise
                     DCMZipFile = zData;
                     DCMZipFile.folder("13-AX T1 POST-19694").forEach(function (relativePath, file) {
-                        console.log("iterating over", relativePath);
-                        console.log(file);
+                        //console.log("iterating over", relativePath);
+                        //console.log(file);
                     });
-                    return zData
+                    return zData; // myZipData = zData as resolved Promise
                 })
             } // END DCM Block
+
         });
 
         console.log("End");
