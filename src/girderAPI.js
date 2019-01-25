@@ -88,6 +88,33 @@ async function get_collection_ID(collection_name){
     return ID;
 }
 
+async function get_folder_ID(folder_name, collection_id){
+    // Description: Gets ID of folder with 'folder_name' within collection 'collection_id'
+    // Input: Folder name and known collection ID
+    // prints url used for Girder API call
+    // prints folder ID if successfull
+    // prints if Unsuccessful
+    // Return: ID as promise
+
+    let fetch_url= `${girder_url}/api/v1/folder?parentType=collection&parentId=${collection_id}&text=${folder_name}&limit=50&sort=lowerName&sortdir=1`;
+    console.log( `Fetch URL: ${fetch_url}` );
+
+    // Girder API returns array with json objects
+    let promise = fetch(fetch_url);
+    let output= promise.then(response => response.json() ).catch(err => console.error(err));
+
+    // resolve promise within async function:
+    let result= await output;
+    if (! result[0]) {
+        console.log( `Find folder: ${folder_name} \tUnsuccessful` );
+        return '';
+    }
+    let ID= result[0]['_id'];
+    console.log( `Result: ${result[0]['_id']}` );
+
+    return ID;
+}
+
 async function create_folder(folder_name, collection_id){
     // Description: Creates folder with 'folder_name' within collection 'collection_id'
     // Input: Desired folder name and known collection ID
@@ -106,7 +133,7 @@ async function create_folder(folder_name, collection_id){
     // resolve promise within async function:
     let result= await output;
     if (! result[0]) {
-        console.log( `create folder: ${folder_name} \tUnsuccessful` );
+        console.log( `Create folder: ${folder_name} \tUnsuccessful` );
         return '';
     }
     let ID= result[0]['_id'];
@@ -114,6 +141,8 @@ async function create_folder(folder_name, collection_id){
 
     return ID;
 }
+
+
 
 async function download_file(file_name, folder_id){
     //TODO
