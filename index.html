@@ -67,7 +67,7 @@
         params["showControlBar"] = false;
         params["showImageButtons"] = false;
 
-        var myAwesomeZipFile; // DCM
+        var DCMZipFile; // DCM
 
         // Run
         webix.ready(function () {
@@ -78,22 +78,22 @@
             papaya.Container.startPapaya();
 
             { // DCM Block
+                /* JSZipUtils.getBinaryContent: Description : Use an AJAX call to fetch a file (HTTP GET) on the server that served the file. 
+                Cross domain requests will work if the browser support them but only if the server send the right headers. 
+                This function doesn't follow redirects : currently only 200 OK are accepted. */
                 myFileUrl =
                     "http://candygram.neurology.emory.edu:8080/api/v1/file/5c4b430ce62914004df6ff72/download"
-                myZipData = new JSZip.external.Promise(function (resolve, reject) {
-                    JSZipUtils.getBinaryContent(myFileUrl, function (err, data) {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve(data);
-                        }
+                myZipData = new JSZip.external.Promise(function (resolve, reject) { // new Promise
+                    JSZipUtils.getBinaryContent(myFileUrl, function (err, data) { // AJAX GET: downloads file
+                        if (err) { reject(err); } 
+                        else { resolve(data); }
                     });
-                }).then(function (data) {
-                    return JSZip.loadAsync(data);
+                }).then(function (data) { // Promise.then()
+                    return JSZip.loadAsync(data); // loads data into new JSZip object
                 }).then(function (zData) {
-                    myAwesomeZipFile = zData;
+                    DCMZipFile = zData;
                     //add any stuff that should happen once the zData exists..
-                    myAwesomeZipFile.folder("13-AX T1 POST-19694").forEach(function (relativePath, file) {
+                    DCMZipFile.folder("13-AX T1 POST-19694").forEach(function (relativePath, file) {
                         console.log("iterating over", relativePath);
                         console.log(file);
                     });
