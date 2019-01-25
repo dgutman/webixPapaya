@@ -31,9 +31,22 @@
     <script>
     console.log("Start");
 
-    console.log("Test API");
-    var output= fetch_url('http://candygram.neurology.emory.edu:8080/api/v1/collection?limit=50&sort=name&sortdir=1');
-    console.log("Done Test API");
+    { // Girder API Block
+        set_girderUrl('http://candygram.neurology.emory.edu:8080');
+        set_collectionId("5c48db6de62914004de6350f"); 
+
+        // placeholder will update once promise is fullfilled; until then, it remains a pleasent greeting.
+        var placeholder='hello';
+        var fetch_response= get_collection_ID(collection_name='FG').then(function(x) {
+            set_collectionId(x); 
+            placeholder=x;
+        }); 
+
+        var fetch_response= create_folder(folder_name='testing', collection_id=get_collectionId()).then(function(x) {
+            set_folderId(x); 
+            placeholder=x;
+        }); 
+    } // END Girder API Block
 
     // Papaya Viewer Parameters: Dictionary
     // Used in webixPapaya $init function
