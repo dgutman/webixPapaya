@@ -29,10 +29,10 @@
     <script type="text/javascript" src="node_modules/requirejs/require.js"></script>
     <script>
         requirejs.onResourceLoad = function (context, map, depArray) {
-            //  console.log(map.id, "loaded");
+            console.log(map.id, "loaded");
         }
     </script>
-    <title>webix Papaya FG</title>
+    <title>webix Papaya</title>
 </head>
 
 <body>
@@ -67,8 +67,7 @@
         params["showControlBar"] = false;
         params["showImageButtons"] = false;
 
-        var myAwesomeZipFile;
-
+        var myAwesomeZipFile; // DCM
 
         // Run
         webix.ready(function () {

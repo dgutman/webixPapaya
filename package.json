@@ -11,7 +11,9 @@
     "requirejs": "^2.3.6",
     "webix": "^6.1.5"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "reload": "^2.4.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
