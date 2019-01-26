@@ -39,80 +39,58 @@
     <script>
         console.log("Start");
 
-        { // Girder API Block
-            set_girderUrl('http://candygram.neurology.emory.edu:8080');
-            set_collectionId("5c48db6de62914004de6350f");
-            set_folderId('5c49e88de62914004ded6b45');
-            set_fileId('5c4b3d52e62914004df6fd08');
-
-            // placeholder will update once promise is fullfilled; until then, it remains a pleasent greeting.
-            var placeholder = 'hello';
-
-            // Test get_collection_ID
-            get_collection_ID('FG')
-                .then(function (x) {
-                    set_collectionId(x);
-                    placeholder = x;
-                });
-            // Test post_folder
-            get_folder_ID('niftis', get_collectionId())
-                .then(function (x) {
-                    set_folderId(x);
-                    placeholder = x;
-                });
-
-            get_file_ID("set-0_tstat2.nii.gz", folder_id)
-                .then(function (x) {
-                    set_fileId(x);
-                    placeholder = x;
-                });
-
-        } // END Girder API Block
-
         // Papaya Viewer Parameters: Dictionary
         // Used in webixPapaya $init function
         var params = []; // List of image full-paths
-        params["images"] = imageList; // From file "imageList.js"
+
+        // Set default girder API vvariables:
+        set_girderUrl('http://candygram.neurology.emory.edu:8080');
+        set_collectionId("5c48db6de62914004de6350f"); // "FG"
+        set_folderId('5c4bb1fee62914004dfc0cb2'); // "niftis_folder"
+        set_fileId('5c4bb534e62914004dfc1038'); // "zipped niftis"
+        // http://candygram.neurology.emory.edu:8080/api/v1/file/5c4bb213e62914004dfc0cb5/download
+
+
+        { // Attempt load from girder Block
+            download_item(file_id)
+                .then(function (z) {
+                    params["images"] = [z['files']["50v50_set-0_2019-M01-D19/set-0_tfce_corrp_tstat1.nii.gz"]];
+                    var layout = setupPanels(params);
+
+                    webix.ready(function () {
+                        console.log("webix.ready");
+                        layout = setupPanels(params);
+                        webix.ui(layout);
+                        papaya.Container.startPapaya();
+                    });
+                })
+
+            params['set-0_tfce_corrp_tstat1.nii.gz'] = {
+                "min": 0,
+                "max": 1, // binary mask
+                "lut": "Greyscale",
+                "alpha": 0.5,
+                "visible": 1,
+            };
+
+
+        } // END Block
+
+        //params["images"] = imageList; // From file "imageList.js"
         params["expandable"] = true;
         params["showControls"] = false;
         params["showControlBar"] = false;
         params["showImageButtons"] = false;
 
-        var DCMZipFile = ''; // DCM
-
-        // Run
-        webix.ready(function () {
-            console.log("webix.ready");
-            setImageParams(params);
-            layout = setupPanels(params);
-            webix.ui(layout);
-            papaya.Container.startPapaya();
-
-            { // DCM Block
-                /* JSZipUtils.getBinaryContent: Description : Use an AJAX call to fetch a file (HTTP GET) on the server that served the file. */
-                myFileUrl =
-                    "http://candygram.neurology.emory.edu:8080/api/v1/file/5c4b430ce62914004df6ff72/download"
-                myZipData = new JSZip.external.Promise(function (resolve, reject) { // new Promise
-                    JSZipUtils.getBinaryContent(myFileUrl, function (err, data) { // AJAX GET: downloads file
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve(data);
-                        }
-                    });
-                }).then(function (data) { // myZipData.then()
-                    return JSZip.loadAsync(data); // loads data into new JSZip object
-                }).then(function (zData) { // zData is resolved promise
-                    DCMZipFile = zData;
-                    DCMZipFile.folder("13-AX T1 POST-19694").forEach(function (relativePath, file) {
-                        //console.log("iterating over", relativePath);
-                        //console.log(file);
-                    });
-                    return zData; // myZipData = zData as resolved Promise
-                })
-            } // END DCM Block
-
-        });
+        // Commented out for Girder Version
+        /*         // Run
+                webix.ready(function () {
+                    console.log("webix.ready");
+                    setImageParams(params);
+                    layout = setupPanels(params);
+                    webix.ui(layout);
+                    papaya.Container.startPapaya();
+                }); */
 
         console.log("End");
     </script>

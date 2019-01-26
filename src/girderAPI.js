@@ -10,6 +10,7 @@ var girder_url = '';
 var collection_id = '';
 var folder_id = '';
 var file_id = '';
+var zipFile = 'a'; // item
 
 // Setters and Getters:
 function set_girderUrl(url) {
@@ -80,10 +81,6 @@ function webix_ajax(collection_name, public = 'false') {
     });
 }
 
-async function post_collection(collection_name, description_text = '', public = 'false') {
-    // TODO
-}
-
 async function get_collection_ID(collection_name) {
     // Description: Obtain collection id for collection with name 'collection_name'
     // Input: collection_name is collection name as string.
@@ -91,7 +88,6 @@ async function get_collection_ID(collection_name) {
     // prints found ID
     // Return: ID as promise
 
-    // Create new collection and create folder within collection
     let fetch_url = `${girder_url}/api/v1/collection?text=${collection_name}&limit=50&sort=name&sortdir=1`;
     //console.log(`Fetch URL: ${fetch_url}`);
 
@@ -146,6 +142,8 @@ async function get_folder_ID(folder_name, collection_id) {
 }
 
 async function post_folder(folder_name, collection_id) {
+    // Doesn't work without permissions set
+
     // Description: Creates folder with 'folder_name' within collection 'collection_id'
     // Input: Desired folder name and known collection ID
     // prints url used for Girder API call
@@ -199,7 +197,6 @@ async function get_file_ID(file_name, folder_id) {
     // prints found file ID
     // Return: ID as promise
 
-    // Create new collection and create folder within collection
     let fetch_url = `${girder_url}/api/v1/item?folderId=${folder_id}&name=${file_name}&limit=50&sort=lowerName&sortdir=1`;
     //console.log(`Fetch URL: ${fetch_url}`);
 
@@ -219,3 +216,91 @@ async function get_file_ID(file_name, folder_id) {
     //console.log(`ID: ${ID}`);
     return ID;
 }
+
+async function download_item_nozip(item_id) {
+    // Description: Download item using item_id
+    // Input: ID of file to download
+    // prints url used for Girder API call
+    // prints found file ID
+    // Return: ID as promise
+
+    //http://candygram.neurology.emory.edu:8080/api/v1/item/5c4b3d52e62914004df6fd09/download
+    //http://candygram.neurology.emory.edu:8080/api/v1/item/5c4b3d52e62914004df6fd08/download
+    let fetch_url = `${girder_url}/api/v1/item/${item_id}/download`;
+    console.log(`Fetch URL: ${fetch_url}`);
+
+    // Girder API returns array with json objects
+    let promise = fetch(fetch_url);
+    let output = promise
+        .then(response => {
+            test_item = response.body;
+        })
+        .catch(err => console.error(err));
+
+    return output;
+
+}
+
+async function download_item(item_id) {
+    // Description: Download item using item_id
+    // Input: ID of file to download
+    // prints url used for Girder API call
+    // prints found file ID
+    // Return: ID as promise
+
+    /* JSZipUtils.getBinaryContent: Description : Use an AJAX call to fetch a file (HTTP GET) on the server that served the file. */
+    //file ID: 5c4b3d52e62914004df6fd08, BUT download link:
+    //http://candygram.neurology.emory.edu:8080/api/v1/file/5c4bb534e62914004dfc1038/download
+
+    let fetch_url = `http://candygram.neurology.emory.edu:8080/api/v1/file/${item_id}/download`
+    let myZipData = new JSZip.external.Promise(function (resolve, reject) { // new Promise
+            JSZipUtils.getBinaryContent(fetch_url, function (err, data) { // AJAX GET: downloads file
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+        })
+        .then(function (data) { // myZipData.then()
+            return JSZip.loadAsync(data); // loads data into new JSZip object
+        })
+        .then(function (zData) { // zData is resolved promise
+            zipFile = zData;
+            zipFile.folder("50v50_set-0_2019-M01-D19/").forEach(function (relativePath, file) {
+                //console.log("iterating over", relativePath);
+                //console.log(file);
+            });
+            return zData;
+        })
+    return myZipData;
+}
+
+
+
+/* 
+{ // DCM Block
+    var DCMzipFile = ''; // DCM
+
+    var myFileUrl =
+        "http://candygram.neurology.emory.edu:8080/api/v1/file/5c4b430ce62914004df6ff72/download"
+    var myZipData = new JSZip.external.Promise(function (resolve, reject) { // new Promise
+        JSZipUtils.getBinaryContent(myFileUrl, function (err, data) { // AJAX GET: downloads file
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        });
+    }).then(function (data) { // myZipData.then()
+        return JSZip.loadAsync(data); // loads data into new JSZip object
+    }).then(function (zData) { // zData is resolved promise
+        DCMzipFile = zData;
+        DCMzipFile.folder("13-AX T1 POST-19694").forEach(function (relativePath, file) {
+            //console.log("iterating over", relativePath);
+            //console.log(file);
+        });
+        return zData; // myZipData = zData as resolved Promise
+    })
+} // END DCM Block 
+*/
