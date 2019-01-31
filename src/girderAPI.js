@@ -1,11 +1,10 @@
 // API (get collection list): http://candygram.neurology.emory.edu:8080/api/v1/collection?limit=50&sort=name&sortdir=1
-// Hello
 // Notes:
 // async/await explanation: https://javascript.info/async-await
 // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
 // https://flaviocopes.com/fetch-api/
 // fetch returns promise: .then().text() returns promise with text of ajax response.
-
+"use strict";
 // Should be a class/struct etc.
 let girder_url = '';
 let collection_id = '';
@@ -73,8 +72,8 @@ async function fetchUrl(url) {
     return output;
 }
 
-function webix_ajax(collection_name, public = 'false') {
-    let fetch_url = `${girder_url}/api/v1/collection?name=${collection_name}&public=${public}`;
+function webix_ajax(collection_name, makepublic = 'false') {
+    let fetch_url = `${girder_url}/api/v1/collection?name=${collection_name}&public=${makepublic}`;
     let promise = new webix.promise(function (success, fail) {
         webix.ajax(url, function (text) {
             if (text) success(text);

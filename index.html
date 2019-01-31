@@ -41,6 +41,7 @@
 
 <body>
     <script>
+        "use strict";
         console.log("Start");
 
         // Papaya Viewer Parameters: Dictionary
@@ -53,6 +54,8 @@
         set_folderId('5c51c1d6e62914004d1d376b'); // "niftis_folder/50v50_set-0_2019-M01-D19/"
         set_fileId('5c51c1f6e62914004d1d3cbd'); // "zipped niftis"
 
+        //params["images"]=['../static/images/MNI152_T1_1mm.nii.gz'];
+
         build_params(folder_id) // returns params
             .then(function (x) {
                 params=x;
@@ -63,11 +66,11 @@
                 
                 webix.ready(function () {
                     console.log("webix.ready");
-                    layout = setupPanels(params); // webixLayout.js
+                    layout = setupPanels(); // webixLayout.js
                     webix.ui(layout);
                     console.log(params);
                     papaya.Container.startPapaya();
-                    //papaya.Container.resetViewer(index[, params]) // to reset image
+                    //papaya.Container.resetViewer(0, params) // to reset viewer with params
                 });
             })
         console.log("End");

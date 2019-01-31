@@ -1,5 +1,6 @@
-// Webix Layout:
-function setupPanels(params) {
+"use strict";
+// Webix Layout: (params needs to be defined elsewhere)
+function setupPanels() {
     console.log("setupPanels");
 
     var papayaColorTables = ["Greyscale", "Spectrum",
@@ -113,8 +114,8 @@ function setupPanels(params) {
                 on: {
                     onChange: function (newv, oldv) {
                         layerN = parseInt($$("layerCBox").getInputNode().value); // Obtain current layer int from layerCBox
-                        myViewer = papayaContainers[0].viewer;
-                        papayaContainers[0].viewer.screenVolumes[layerN].changeColorTable(myViewer, newv);
+                        let myViewer = papayaContainers[0].viewer;
+                        papayaContainers[0].viewer.screenVolumes[layerN].changeColorTable(myViewer , newv);
                         params[params['imageNames'][layerN]]["lut"] = newv; // save new value to params
                     }, // onChange
                 }, // on event
