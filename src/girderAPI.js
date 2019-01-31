@@ -6,11 +6,12 @@
 // https://flaviocopes.com/fetch-api/
 // fetch returns promise: .then().text() returns promise with text of ajax response.
 
-var girder_url = '';
-var collection_id = '';
-var folder_id = '';
-var file_id = '';
-var zipFile = 'a'; // item
+// Should be a class/struct etc.
+let girder_url = '';
+let collection_id = '';
+let folder_id = '';
+let file_id = '';
+let zipFile = ''; // item
 
 // Setters and Getters:
 function set_girderUrl(url) {
@@ -44,6 +45,7 @@ function set_fileId(id) {
 function get_fileId() {
     return file_id;
 }
+
 
 async function fetchUrl(url) {
     // Description: Generic function to fetch from url then print results and return response
@@ -217,16 +219,15 @@ async function get_file_ID(file_name, folder_id) {
     return ID;
 }
 
-async function download_item_nozip(item_id) {
+async function download_file(item_id) {
     // Description: Download item using item_id
     // Input: ID of file to download
     // prints url used for Girder API call
     // prints found file ID
     // Return: ID as promise
-
-    //http://candygram.neurology.emory.edu:8080/api/v1/item/5c4b3d52e62914004df6fd09/download
-    //http://candygram.neurology.emory.edu:8080/api/v1/item/5c4b3d52e62914004df6fd08/download
-    let fetch_url = `${girder_url}/api/v1/item/${item_id}/download`;
+    // http://candygram.neurology.emory.edu:8080/api/v1/file/5c51b898e62914004d1c96e6/download
+    // http://candygram.neurology.emory.edu:8080/api/v1/file/5c51b898e62914004d1c96e6/download?contentDisposition=attachment
+    let fetch_url = `${girder_url}/api/v1/item/${item_id}/download?contentDisposition=attachment`;
     console.log(`Fetch URL: ${fetch_url}`);
 
     // Girder API returns array with json objects
@@ -238,10 +239,9 @@ async function download_item_nozip(item_id) {
         .catch(err => console.error(err));
 
     return output;
-
 }
 
-async function download_item(item_id) {
+async function download_zip_item(item_id) {
     // Description: Download item using item_id
     // Input: ID of file to download
     // prints url used for Girder API call
@@ -252,7 +252,10 @@ async function download_item(item_id) {
     //file ID: 5c4b3d52e62914004df6fd08, BUT download link:
     //http://candygram.neurology.emory.edu:8080/api/v1/file/5c4bb534e62914004dfc1038/download
 
-    let fetch_url = `http://candygram.neurology.emory.edu:8080/api/v1/file/${item_id}/download`
+    var zipFile;
+    let fetch_url = `${girder_url}/api/v1/file/${item_id}/download`
+    console.log(`Fetch URL2: ${fetch_url}`);
+
     let myZipData = new JSZip.external.Promise(function (resolve, reject) { // new Promise
             JSZipUtils.getBinaryContent(fetch_url, function (err, data) { // AJAX GET: downloads file
                 if (err) {
@@ -276,7 +279,57 @@ async function download_item(item_id) {
     return myZipData;
 }
 
+async function get_folder_contents(folder_id) {
+    // Description: Get folder contents as json
+    // Input: ID of folder to explore
+    // prints url used for Girder API call
+    // Return: json describing folder contents
 
+    let fetch_url = `${girder_url}/api/v1/item?folderId=${folder_id}&limit=50&sort=lowerName&sortdir=1`;
+    console.log(`Fetch URL: ${fetch_url}`);
+
+    // Girder API returns array with json objects
+    let promise = fetch(fetch_url);
+    let output = promise
+        .then(response => response.json())
+        .catch(err => console.error(err));
+
+    return output;
+}
+
+
+async function build_params(folder_id) {
+    // Description: define params object for papaya viewer
+    // Input: ID of folder to explore
+    // prints url used for Girder API call
+    // Return: json describing folder contents
+    // output == params
+    let output = [];
+    output['images'] = []; // list of image urls
+    output['imageNames'] = []; // lists of image names
+    output['mapping'] = {}; // maps url to image name
+    
+    let files = ''; // array of json objects representing nifti files
+    let tmpurl = ''; // path to file
+    let tmpname = ''; // name of file
+    let param= get_folder_contents(folder_id) //Get folder contents as json
+        .then(function (x) {
+            files = x;
+
+            // loop through json list of nifti objects to define file_locs and file_names
+            files.forEach(function (i) {
+                //console.log(i);
+                tmpurl = `${girder_url}/api/v1/item/${i._id}/download?contentDisposition=attachment`;
+                output['images'].push(tmpurl);
+                tmpname = i.name.replace('.nii.gz', '');
+                output['imageNames'].push(tmpname);
+                output[tmpname] = aesthetic[tmpname];
+                output['mapping'][tmpurl] = tmpname;
+            })
+            return output; // becomes params
+        })
+        return param;
+}
 
 /* 
 { // DCM Block

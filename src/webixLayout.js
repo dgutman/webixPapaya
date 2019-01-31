@@ -14,7 +14,7 @@ function setupPanels(params) {
         rows: [{
                 view: "template",
                 template: "Info",
-                width: 500,
+                width: 200,
                 height: 50,
                 type: "header"
             }, // text
@@ -30,27 +30,23 @@ function setupPanels(params) {
                 view: "template",
                 template: "Viewer",
                 type: "header"
-            }, // Papaya Viewer
+            }, // Header
             {
                 view: "webixPapaya"
-            }, // Papaya Viewer
+            } // Papaya Viewer
         ]
     };
 
     // Initial values for controls:
-    var layerN = 0; // image index
-    var imageName = params["images"][layerN]["name"]; // image path // ADDED name FOR GIRDER VERSION
-    imageName = imageName.substring(imageName.lastIndexOf('/') + 1); // image filename
-    var imageValues = params[imageName]; // parameters for image
+    var layerN = 0; // initial image index
+    var imageName = params['imageNames'][layerN]; // initial image name
+    var imageValues = params[imageName]; // initial parameters for image
+    console.log(imageValues)
 
-    // Image names without directory paths:
-    var imageNameList = [];
-    for (i in params["images"]) {
-        // skip loop if the property is from prototype, otherwise will print extra items:
-        if (!params["images"].hasOwnProperty(i)) continue;
-        tempName = params["images"][parseInt(i)]["name"]; // image path // ADDED name FOR GIRDER VERSION
-        tempName = tempName.substring(tempName.lastIndexOf('/') + 1)
-        imageNameList.push(tempName);
+    // indexes of all images as string
+    var iterimages = [];
+    for (var i = 0; i < params['imageNames'].length; i++) {
+        iterimages.push(i.toString());
     }
 
     var rightPanel = {
@@ -65,12 +61,14 @@ function setupPanels(params) {
                 id: "layerCBox",
                 label: "Layer",
                 inputWidth: 250,
-                options: ["0", "1", "2"],
-                value: "0",
+                options: iterimages,
+                value: layerN.toString(),
                 on: {
                     onChange: function (newv, oldv) {
+                        console.log(oldv, newv);
                         layerN = parseInt(newv); // image index
-                        imageValues = params[imageNameList[layerN]];
+                        imageValues = params[params['imageNames'][layerN]];
+                        console.log(imageValues);
                         $$("colorCBox").setValue(imageValues["lut"]);
                         $$("visibilitySwitch").setValue(imageValues["visible"]);
                         $$("alphaCounter").setValue(imageValues["alpha"]);
@@ -83,20 +81,24 @@ function setupPanels(params) {
                 view: "switch",
                 id: "visibilitySwitch",
                 label: "Visible",
-                value: imageValues["visible"],
+                value: imageValues["visible"], // initial value for layer 0
                 onLabel: "on",
                 offLabel: "off",
                 on: {
                     onItemClick: function (newv, oldv) {
-                        console.log(`switch: from: ${oldv} to: ${newv}`);
                         layerN = parseInt($$("layerCBox").getInputNode().value); // Obtain current layer int from layerCBox
-                        papayaContainers[0].viewer.toggleOverlay(layerN);
-                        imageName = imageNameList[layerN];
+                        papayaContainers[0].viewer.toggleOverlay(layerN); // toggles layer visibility
+                        // Alternatives:
+                        // papaya.Container.hideImage(0, imageIndex)
+                        // papaya.Container.showImage(0, imageIndex)
+                        imageName = params['imageNames'][layerN];
                         if (params[imageName]["visible"] == 1) {
                             params[imageName]["visible"] = 0;
+                            console.log(`${imageName} OFF`);
                         } // change params["imageName"]["visible"] to save visibility state
                         else {
                             params[imageName]["visible"] = 1;
+                            console.log(`${imageName} ON`);
                         }
                     }, // onChange
                 }, // on event
@@ -113,7 +115,7 @@ function setupPanels(params) {
                         layerN = parseInt($$("layerCBox").getInputNode().value); // Obtain current layer int from layerCBox
                         myViewer = papayaContainers[0].viewer;
                         papayaContainers[0].viewer.screenVolumes[layerN].changeColorTable(myViewer, newv);
-                        params[imageNameList[layerN]]["lut"] = newv; // save new value to params
+                        params[params['imageNames'][layerN]]["lut"] = newv; // save new value to params
                     }, // onChange
                 }, // on event
             }, // combobox
@@ -130,7 +132,7 @@ function setupPanels(params) {
                         layerN = parseInt($$("layerCBox").getInputNode().value); // Obtain current layer int from layerCBox
                         papayaContainers[0].viewer.screenVolumes[layerN].alpha = newv;
                         papayaContainers[0].viewer.drawViewer(true, false);
-                        params[imageNameList[layerN]]["alpha"] = newv; // save new value to params
+                        params[params['imageNames'][layerN]]["alpha"] = newv; // save new value to params
                     }, // onChange
                 }, // on event
             }, // counter
@@ -147,7 +149,7 @@ function setupPanels(params) {
                         layerN = parseInt($$("layerCBox").getInputNode().value); // Obtain current layer int from layerCBox
                         papayaContainers[0].viewer.screenVolumes[layerN].screenMin = newv;
                         papayaContainers[0].viewer.drawViewer(true, false);
-                        params[imageNameList[layerN]]["min"] = newv; // save new value to params
+                        params[params['imageNames'][layerN]]["min"] = newv; // save new value to params
                     }, // onChange
                 }, // on event
             }, // counter
@@ -164,7 +166,7 @@ function setupPanels(params) {
                         layerN = parseInt($$("layerCBox").getInputNode().value); // Obtain current layer int from layerCBox
                         papayaContainers[0].viewer.screenVolumes[layerN].screenMax = newv;
                         papayaContainers[0].viewer.drawViewer(true, false);
-                        params[imageNameList[layerN]]["max"] = newv; // save new value to params
+                        params[params['imageNames'][layerN]]["max"] = newv; // save new value to params
                     }, // onChange
                 }, // on event
             }, // counter
