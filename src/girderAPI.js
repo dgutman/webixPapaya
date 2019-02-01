@@ -314,7 +314,7 @@ async function build_params(folder_id) {
     let param= get_folder_contents(folder_id) //Get folder contents as json
         .then(function (x) {
             files = x;
-
+            
             // loop through json list of nifti objects to define file_locs and file_names
             files.forEach(function (i) {
                 //console.log(i);

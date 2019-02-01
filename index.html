@@ -25,6 +25,8 @@
     <script src="/src/girderAPI.js" type="text/javascript"></script>
     <!-- Use default randomise output parameters for visualization -->
     <script src="/src/randomise_output_aesthetic.js" type="text/javascript"></script>
+    <!-- Use default randomise output parameters for visualization -->
+    <script src="/src/initializeVis.js" type="text/javascript"></script>
     <!-- JSZip -->
     <script src="/node_modules/jszip/dist/jszip.js" type="text/javascript"></script>
     <script src="/node_modules/jszip-utils/dist/jszip-utils.js" type="text/javascript"></script>
@@ -54,16 +56,25 @@
         set_folderId('5c51c1d6e62914004d1d376b'); // "niftis_folder/50v50_set-0_2019-M01-D19/"
         set_fileId('5c51c1f6e62914004d1d3cbd'); // "zipped niftis"
 
-        //params["images"]=['../static/images/MNI152_T1_1mm.nii.gz'];
+        /* Define background image to start papaya viewer:
+        params["images"] = ['../static/images/MNI152_T1_1mm.nii.gz'];
+        params['imageNames'] = ['MNI152_T1_1mm.nii.gz'];
+        params['MNI152_T1_1mm.nii.gz'] = {'visible':1, 'lut':"Fire", 'min':0, 'max':10000, 'alpha':1};  
+        */
 
         build_params(folder_id) // returns params
             .then(function (x) {
-                params=x;
+                params = x;
                 params["expandable"] = true;
                 params["showControls"] = false;
                 params["showControlBar"] = false;
                 params["showImageButtons"] = false;
-                
+                params["loadingComplete"] = function (x) {
+                    console.log("Images Loaded");
+                    initViz();
+                    
+                }
+
                 webix.ready(function () {
                     console.log("webix.ready");
                     layout = setupPanels(); // webixLayout.js
@@ -73,6 +84,9 @@
                     //papaya.Container.resetViewer(0, params) // to reset viewer with params
                 });
             })
+
+
+
         console.log("End");
     </script>
 </body>

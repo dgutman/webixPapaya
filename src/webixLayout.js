@@ -88,16 +88,18 @@ function setupPanels() {
                 on: {
                     onItemClick: function (newv, oldv) {
                         layerN = parseInt($$("layerCBox").getInputNode().value); // Obtain current layer int from layerCBox
-                        papayaContainers[0].viewer.toggleOverlay(layerN); // toggles layer visibility
+                        //papayaContainers[0].viewer.toggleOverlay(layerN); // toggles layer visibility
                         // Alternatives:
                         // papaya.Container.hideImage(0, imageIndex)
                         // papaya.Container.showImage(0, imageIndex)
                         imageName = params['imageNames'][layerN];
                         if (params[imageName]["visible"] == 1) {
+                            papaya.Container.hideImage(0, layerN);
                             params[imageName]["visible"] = 0;
                             console.log(`${imageName} OFF`);
                         } // change params["imageName"]["visible"] to save visibility state
                         else {
+                            papaya.Container.showImage(0, layerN)
                             params[imageName]["visible"] = 1;
                             console.log(`${imageName} ON`);
                         }
