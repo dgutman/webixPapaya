@@ -61,7 +61,7 @@ function setupPanels() {
                 view: "combo",
                 id: "layerCBox",
                 label: "Layer",
-                inputWidth: 250,
+                inputWidth: 500,
                 options: iterimages,
                 value: layerN.toString(),
                 on: {
@@ -89,9 +89,6 @@ function setupPanels() {
                     onItemClick: function (newv, oldv) {
                         layerN = parseInt($$("layerCBox").getInputNode().value); // Obtain current layer int from layerCBox
                         //papayaContainers[0].viewer.toggleOverlay(layerN); // toggles layer visibility
-                        // Alternatives:
-                        // papaya.Container.hideImage(0, imageIndex)
-                        // papaya.Container.showImage(0, imageIndex)
                         imageName = params['imageNames'][layerN];
                         if (params[imageName]["visible"] == 1) {
                             papaya.Container.hideImage(0, layerN);
@@ -110,7 +107,7 @@ function setupPanels() {
                 view: "combo",
                 id: "colorCBox",
                 label: "Color",
-                inputWidth: 250,
+                inputWidth: 500,
                 options: papayaColorTables,
                 value: imageValues["lut"],
                 on: {
@@ -176,7 +173,7 @@ function setupPanels() {
             {
                 view: "button",
                 id: "swapViewsButton",
-                inputWidth: 250,
+                inputWidth: 500,
                 value: "Swap Views",
                 click: function () {
                     papayaContainers[0].viewer.rotateViews()
