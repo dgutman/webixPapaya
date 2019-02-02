@@ -1,6 +1,7 @@
 "use strict";
 // params is predefined
 function initViz() {
+    console.log('Initializing Image parameters...')
     // Description: toggles values of all images to match params
     // Input: expects params to be predefined
     params["imageNames"].forEach(function (currentimage) {

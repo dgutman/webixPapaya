@@ -1,5 +1,115 @@
 "use strict";
 // Webix Layout: (params needs to be defined elsewhere)
+
+var dtableparams = [{
+        id: "name",
+        header: "Name",
+        width: 180,
+        sort: "string",
+    },
+    {
+        id: "layer",
+        header: "Layer",
+        width: 50,
+        sort: "int",
+        editor: "text"
+    },
+    {
+        id: "lut",
+        header: "Color",
+        sort: "string",
+        editor: "text"
+    },
+    {
+        id: "alpha",
+        header: "Alpha",
+        width: 50,
+        sort: "int",
+        editor: "text"
+    },
+    {
+        id: "min",
+        header: "Min",
+        width: 50,
+        sort: "int",
+        editor: "text"
+    },
+    {
+        id: "max",
+        header: "Max",
+        width: 60,
+        sort: "int",
+        editor: "text"
+    },
+    {
+        id: "visible",
+        header: "Visible",
+        width: 60,
+        sort: "int",
+        editor: "text"
+    }
+]
+
+var dtable = { // Datatable:
+    view: "datatable",
+    id: "grid",
+    width: 570,
+    columns: dtableparams, // column names and ids
+    editable: true,
+    editaction: "dblclick",
+    scroll: false,
+    select: true,
+    on: {
+        "onAfterEditStop": function (state, editor, ignoreUpdate) {
+            if (state.value != state.old) {
+                let item = $$("grid").getItem(editor.row); // get name of image for row changed
+                let iname = item.name;
+                let layerN = item.layer;
+                let col = editor.column;
+                let myViewer = papayaContainers[0].viewer;
+                console.log(col);
+
+                if (col == "lut") {
+                    params[iname]["lut"] = state.value;
+                    papayaContainers[0].viewer.screenVolumes[layerN].changeColorTable(myViewer, params[iname]["lut"]);
+                    papayaContainers[0].viewer.drawViewer(true, false);
+                    console.log(`Value Changed: lut ${state.value}`);
+                }
+                if (col == "alpha") {
+                    params[iname]["alpha"] = parseInt(state.value);
+                    papayaContainers[0].viewer.screenVolumes[layerN].alpha = params[iname]["alpha"];
+                    papayaContainers[0].viewer.drawViewer(true, false);
+                    console.log(`Value Changed: alpha ${state.value}`);
+                }
+                if (col == "min") {
+                    params[iname]["min"] = parseInt(state.value);
+                    papayaContainers[0].viewer.screenVolumes[layerN].min = params[iname]["min"];
+                    papayaContainers[0].viewer.drawViewer(true, false);
+                    console.log(`Value Changed: min ${state.value}`);
+                }
+                if (col == "max") {
+                    params[iname]["max"] = parseInt(state.value);
+                    papayaContainers[0].viewer.screenVolumes[layerN].max = params[iname]["max"];
+                    papayaContainers[0].viewer.drawViewer(true, false);
+                    console.log(`Value Changed: max ${state.value}`);
+                }
+                if (col == "visible") {
+                    params[iname]["visible"] = parseInt(state.value);
+                    if (params[iname]["visible"] == 1) {
+                        papaya.Container.showImage(0, layerN);
+                        console.log(`Value Changed: ON ${state.value}`);
+                    } else {
+                        papaya.Container.hideImage(0, layerN)
+                        console.log(`Value Changed: OFF ${state.value}`);
+                    }
+                }
+            } else {
+                console.log("No Change");
+            }
+        }
+    }
+}
+//$$("grid").getItem(1549064114065)
 function setupPanels() {
     console.log("setupPanels");
 
@@ -14,15 +124,15 @@ function setupPanels() {
     var leftPanel = {
         rows: [{
                 view: "template",
-                template: "Info",
-                width: 200,
-                height: 50,
+                template: "Images",
                 type: "header"
             }, // text
             {
-                view: "list",
-                data: params["images"]
-            },
+                view: "template",
+                template: "Girder Folder",
+                type: "header"
+            }, // TODO: Show girder folder name used to get images, allow dynamic changing and image reloading
+            dtable,
         ],
     };
 
@@ -61,7 +171,7 @@ function setupPanels() {
                 view: "combo",
                 id: "layerCBox",
                 label: "Layer",
-                inputWidth: 500,
+                inputWidth: 300,
                 options: iterimages,
                 value: layerN.toString(),
                 on: {
@@ -107,14 +217,14 @@ function setupPanels() {
                 view: "combo",
                 id: "colorCBox",
                 label: "Color",
-                inputWidth: 500,
+                inputWidth: 300,
                 options: papayaColorTables,
                 value: imageValues["lut"],
                 on: {
                     onChange: function (newv, oldv) {
                         layerN = parseInt($$("layerCBox").getInputNode().value); // Obtain current layer int from layerCBox
                         let myViewer = papayaContainers[0].viewer;
-                        papayaContainers[0].viewer.screenVolumes[layerN].changeColorTable(myViewer , newv);
+                        papayaContainers[0].viewer.screenVolumes[layerN].changeColorTable(myViewer, newv);
                         params[params['imageNames'][layerN]]["lut"] = newv; // save new value to params
                     }, // onChange
                 }, // on event
@@ -123,6 +233,7 @@ function setupPanels() {
                 view: "counter",
                 id: "alphaCounter",
                 label: "Alpha",
+                inputWidth: 300,
                 min: 0,
                 max: 1,
                 step: 0.05,
@@ -140,6 +251,7 @@ function setupPanels() {
                 view: "counter",
                 id: "minCounter",
                 label: "Min",
+                inputWidth: 300,
                 min: 0,
                 max: 10000,
                 step: 0.05,
@@ -157,6 +269,7 @@ function setupPanels() {
                 view: "counter",
                 id: "maxCounter",
                 label: "Max",
+                inputWidth: 300,
                 min: 0,
                 max: 10000,
                 step: 0.05,
@@ -173,7 +286,7 @@ function setupPanels() {
             {
                 view: "button",
                 id: "swapViewsButton",
-                inputWidth: 500,
+                inputWidth: 300,
                 value: "Swap Views",
                 click: function () {
                     papayaContainers[0].viewer.rotateViews()
