@@ -1,6 +1,13 @@
 "use strict";
 // Webix Layout: (params needs to be defined elsewhere)
 
+var papayaColorTables = ["Greyscale", "Spectrum",
+    "Overlay (Positives)", "Overlay (Negatives)",
+    "Hot-and-Cold", "Gold",
+    "Red Overlay", "Green Overlay",
+    "Blue Overlay", "Fire"
+]
+
 var dtableparams = [{
         id: "name",
         header: "Name",
@@ -18,7 +25,8 @@ var dtableparams = [{
         id: "lut",
         header: "Color",
         sort: "string",
-        editor: "text"
+        editor: "select",
+        options: papayaColorTables
     },
     {
         id: "alpha",
@@ -46,7 +54,9 @@ var dtableparams = [{
         header: "Visible",
         width: 60,
         sort: "int",
-        editor: "text"
+        editor: "checkbox",
+        checkValue: "1", // Shows up as 'true'
+        uncheckValue: "0" // Shows up as 'false'
     }
 ]
 
@@ -56,9 +66,10 @@ var dtable = { // Datatable:
     width: 570,
     columns: dtableparams, // column names and ids
     editable: true,
-    editaction: "dblclick",
+    editaction: "click",
     scroll: false,
     select: true,
+    checkboxRefresh:true,
     on: {
         "onAfterEditStop": function (state, editor, ignoreUpdate) {
             if (state.value != state.old) {
@@ -82,23 +93,31 @@ var dtable = { // Datatable:
                     console.log(`Value Changed: alpha ${state.value}`);
                 }
                 if (col == "min") {
+                    console.log(`Value ${parseInt(state.value)}`)
+                    console.log(`IName ${iname}`)
+                    console.log(`Layer ${layerN}`)
                     params[iname]["min"] = parseInt(state.value);
                     papayaContainers[0].viewer.screenVolumes[layerN].min = params[iname]["min"];
                     papayaContainers[0].viewer.drawViewer(true, false);
+                    papaya.Container.resetViewer(0, params);
                     console.log(`Value Changed: min ${state.value}`);
                 }
                 if (col == "max") {
                     params[iname]["max"] = parseInt(state.value);
                     papayaContainers[0].viewer.screenVolumes[layerN].max = params[iname]["max"];
                     papayaContainers[0].viewer.drawViewer(true, false);
+                    papaya.Container.resetViewer(0, params);
                     console.log(`Value Changed: max ${state.value}`);
                 }
                 if (col == "visible") {
-                    params[iname]["visible"] = parseInt(state.value);
-                    if (params[iname]["visible"] == 1) {
+                    //params[iname]["visible"] = parseInt(state.value);
+                    console.log(`State ${state.value}`);
+                    if (state.value) {
+                        params[iname]["visible"] = 1;
                         papaya.Container.showImage(0, layerN);
                         console.log(`Value Changed: ON ${state.value}`);
                     } else {
+                        params[iname]["visible"] = 0;
                         papaya.Container.hideImage(0, layerN)
                         console.log(`Value Changed: OFF ${state.value}`);
                     }
@@ -106,19 +125,13 @@ var dtable = { // Datatable:
             } else {
                 console.log("No Change");
             }
+
         }
     }
 }
 //$$("grid").getItem(1549064114065)
 function setupPanels() {
     console.log("setupPanels");
-
-    var papayaColorTables = ["Greyscale", "Spectrum",
-        "Overlay (Positives)", "Overlay (Negatives)",
-        "Hot-and-Cold", "Gold",
-        "Red Overlay", "Green Overlay",
-        "Blue Overlay", "Fire"
-    ]
 
     // Webix Panels:
     var leftPanel = {

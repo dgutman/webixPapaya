@@ -11,7 +11,7 @@ function setupGrid() {
             "alpha": params[currentimage]["alpha"],
             "min": params[currentimage]["min"],
             "max": params[currentimage]["max"],
-            "visible": params[currentimage]["visible"]
+            "visible": params[currentimage]["visible"] == 1 ? 'true' : 'false'
         };
 
         $$("grid").add(gridData);
