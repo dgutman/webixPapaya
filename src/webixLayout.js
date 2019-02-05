@@ -38,7 +38,7 @@ var dtableparams = [{
     {
         id: "min",
         header: "Min",
-        width: 50,
+        width: 60,
         sort: "int",
         editor: "text"
     },
@@ -63,14 +63,22 @@ var dtableparams = [{
 var dtable = { // Datatable:
     view: "datatable",
     id: "grid",
-    width: 570,
+    width: 580,
     columns: dtableparams, // column names and ids
     editable: true,
     editaction: "click",
     scroll: false,
     select: true,
-    checkboxRefresh:true,
+    checkboxRefresh: true,
     on: {
+        "onAfterSelect": function (selection, preserve) {
+            console.log(`New Selection: ${selection}`);
+            let item = $$("grid").getItem(selection);
+            let iname = item.name;
+            let layerN = item.layer;
+            console.log(`Item: ${iname}`);
+            papayaContainers[0].viewer.setCurrentScreenVol(layerN);
+        },
         "onAfterEditStop": function (state, editor, ignoreUpdate) {
             if (state.value != state.old) {
                 let item = $$("grid").getItem(editor.row); // get name of image for row changed
@@ -87,26 +95,28 @@ var dtable = { // Datatable:
                     console.log(`Value Changed: lut ${state.value}`);
                 }
                 if (col == "alpha") {
-                    params[iname]["alpha"] = parseInt(state.value);
-                    papayaContainers[0].viewer.screenVolumes[layerN].alpha = params[iname]["alpha"];
+                    params[iname]["alpha"] = state.value;
+                    papayaContainers[0].viewer.screenVolumes[layerN].alpha = parseFloat(params[iname]["alpha"]);
                     papayaContainers[0].viewer.drawViewer(true, false);
-                    console.log(`Value Changed: alpha ${state.value}`);
+                    console.log(`Value Changed: alpha ${papayaContainers[0].viewer.screenVolumes[layerN].alpha}`);
                 }
                 if (col == "min") {
-                    console.log(`Value ${parseInt(state.value)}`)
+                    console.log(`Value ${state.value}`)
                     console.log(`IName ${iname}`)
                     console.log(`Layer ${layerN}`)
-                    params[iname]["min"] = parseInt(state.value);
-                    papayaContainers[0].viewer.screenVolumes[layerN].min = params[iname]["min"];
+                    params[iname]["min"] = state.value;
+                    //papayaContainers[0].viewer.screenVolumes[layerN].min = params[iname]["min"];
+                    papayaContainers[0].viewer.screenVolumes[layerN].screenMin = parseFloat(params[iname]["min"]);
+                    papayaContainers[0].viewer.screenVolumes[layerN].updateScreenRange()
                     papayaContainers[0].viewer.drawViewer(true, false);
-                    papaya.Container.resetViewer(0, params);
+                    //papaya.Container.resetViewer(0);
                     console.log(`Value Changed: min ${state.value}`);
                 }
                 if (col == "max") {
-                    params[iname]["max"] = parseInt(state.value);
-                    papayaContainers[0].viewer.screenVolumes[layerN].max = params[iname]["max"];
+                    params[iname]["max"] = state.value;
+                    papayaContainers[0].viewer.screenVolumes[layerN].screenMax = parseFloat(params[iname]["max"]);
+                    papayaContainers[0].viewer.screenVolumes[layerN].updateScreenRange()
                     papayaContainers[0].viewer.drawViewer(true, false);
-                    papaya.Container.resetViewer(0, params);
                     console.log(`Value Changed: max ${state.value}`);
                 }
                 if (col == "visible") {

@@ -70,20 +70,21 @@
                 params["expandable"] = true;
                 params["showControls"] = false;
                 params["showControlBar"] = false;
-                params["showImageButtons"] = false;
+                //params["showImageButtons"] = false;
                 params["smoothDisplay"] = false;
                 params["loadingComplete"] = function (x) {
                     console.log("Images Loaded");
                     initViz(); // TODO: hide papaya viewer until finished initializing?
+                    setupGrid(); // defines grid, uses variables from papayaViewer
                 }
 
                 webix.ready(function () {
                     console.log("webix.ready");
-                    layout = setupPanels(); // webixLayout.js
+                    layout = setupPanels(); // webixLayout.js, defines layout and grid
                     webix.ui(layout);
                     console.log(params);
                     papaya.Container.startPapaya();
-                    setupGrid();
+                    // setupGrid();
                    
                     //papaya.Container.resetViewer(0, params) // to reset viewer with params
                 });
