@@ -54,9 +54,10 @@ var dtableparams = [{
         header: "Visible",
         width: 60,
         sort: "int",
-        editor: "checkbox",
-        checkValue: "1", // Shows up as 'true'
-        uncheckValue: "0" // Shows up as 'false'
+        template:"{common.checkbox()}"
+        // editor: "checkbox",
+        // checkValue: "1", // Shows up as 'true'
+        // uncheckValue: "0" // Shows up as 'false'
     }
 ]
 
@@ -78,6 +79,23 @@ var dtable = { // Datatable:
             let layerN = item.layer;
             console.log(`Item: ${iname}`);
             papayaContainers[0].viewer.setCurrentScreenVol(layerN);
+        },
+        "onCheck":function(rowId,colId,state) { 
+                let item = $$("grid").getItem(rowId); // get name of image for row changed
+                let iname = item.name;
+                let layerN = item.layer;
+                let myViewer = papayaContainers[0].viewer;
+                
+                console.log(state,rowId,colId)
+                    if (state) {
+                        params[iname]["visible"] = 1;
+                        papaya.Container.showImage(0, layerN);
+                        console.log(`Value Changed: ON ${state.value}`);
+                    } else {
+                        params[iname]["visible"] = 0;
+                        papaya.Container.hideImage(0, layerN)
+                        console.log(`Value Changed: OFF ${state.value}`);
+                    }
         },
         "onAfterEditStop": function (state, editor, ignoreUpdate) {
             if (state.value != state.old) {
