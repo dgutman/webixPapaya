@@ -58,25 +58,20 @@
         set_folderId('5c51c1d6e62914004d1d376b'); // "niftis_folder/50v50_set-0_2019-M01-D19/"
         set_fileId('5c51c1f6e62914004d1d3cbd'); // "zipped niftis"
 
-        /* Define background image to start papaya viewer:
-        params["images"] = ['../static/images/MNI152_T1_1mm.nii.gz'];
-        params['imageNames'] = ['MNI152_T1_1mm.nii.gz'];
-        params['MNI152_T1_1mm.nii.gz'] = {'visible':1, 'lut':"Fire", 'min':0, 'max':10000, 'alpha':1};  
-        */
-
         build_params(folder_id) // returns params
             .then(function (x) {
                 params = x;
                 params["expandable"] = true;
                 params["showControls"] = false;
                 params["showControlBar"] = false;
-                //params["showImageButtons"] = false;
+                params["showImageButtons"] = false;
                 params["smoothDisplay"] = false;
+
                 params["loadingComplete"] = function (x) {
                     console.log("Images Loaded");
                     initViz(); // TODO: hide papaya viewer until finished initializing?
                     setupGrid(); // defines grid, uses variables from papayaViewer
-                }
+                } // image loading callback
 
                 webix.ready(function () {
                     console.log("webix.ready");
@@ -85,10 +80,9 @@
                     console.log(params);
                     papaya.Container.startPapaya();
                     // setupGrid();
-                   
-                    //papaya.Container.resetViewer(0, params) // to reset viewer with params
-                });
-            })
+                }); // webix callback
+
+            }) // END build_params
 
 
 

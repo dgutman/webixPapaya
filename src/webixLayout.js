@@ -139,7 +139,8 @@ var dtable = { // Datatable:
         }
     }
 }
-//$$("grid").getItem(1549064114065)
+
+
 function setupPanels() {
     console.log("setupPanels");
 
@@ -155,7 +156,15 @@ function setupPanels() {
                 template: "Girder Folder",
                 type: "header"
             }, // TODO: Show girder folder name used to get images, allow dynamic changing and image reloading
-            dtable,
+            //short form
+            {
+                view: "combo",
+                id: "girder_folder",
+                label: "Folder",
+                value: "One",
+                options: ["One", "Two", "Three"]
+            },
+            dtable, // datatable / grid of image settings
         ],
     };
 
@@ -330,7 +339,8 @@ function setupPanels() {
             view: "resizer"
         }, middlePanel, {
             view: "resizer"
-        }, rightPanel]
+        }, //rightPanel
+    ]
     };
 
     console.log("Done: setupPanels");
