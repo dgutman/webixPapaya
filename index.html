@@ -11,7 +11,7 @@
     <script src="/node_modules/webix/webix.js" type="text/javascript" charset="utf-8"></script>
     <link href="/node_modules/webix/webix.css" rel="stylesheet" type="text/css" charset="utf-8">
     <!-- papaya -->
-    <script src="/src/papaya.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/modules/papaya.js" type="text/javascript" charset="utf-8"></script>
     <link href="/css/papaya.css" rel="stylesheet" type="text/css" charset="utf-8" />
     <!-- webixPapaya Object  -->
     <script src="/src/webixPapayaObject.js" type="text/javascript"></script>
@@ -19,13 +19,21 @@
     <script src="/src/imageList.js" type="text/javascript"></script>
     <!-- functions -->
     <script src="/src/setImageParams.js" type="text/javascript"></script>
+    <!-- webix Grid Controls -->
+    <script src="/src/webixGrid.js" type="text/javascript"></script>
     <!-- webix Layout and Viewer Controls -->
     <script src="/src/webixLayout.js" type="text/javascript"></script>
     <!-- get Girder Images through API -->
     <script src="/src/girderAPI.js" type="text/javascript"></script>
-    <!--  -->
+    <!-- Use default randomise output parameters for visualization -->
+    <script src="/src/randomise_output_aesthetic.js" type="text/javascript"></script>
+    <!-- Use default randomise output parameters for visualization -->
+    <script src="/src/initializeVis.js" type="text/javascript"></script>
+    <!-- JSZip -->
     <script src="/node_modules/jszip/dist/jszip.js" type="text/javascript"></script>
     <script src="/node_modules/jszip-utils/dist/jszip-utils.js" type="text/javascript"></script>
+
+    <!-- Require -->
     <script type="text/javascript" src="node_modules/requirejs/require.js"></script>
     <script>
         requirejs.onResourceLoad = function (context, map, depArray) {
@@ -37,82 +45,46 @@
 
 <body>
     <script>
+        "use strict";
         console.log("Start");
-
-        { // Girder API Block
-            set_girderUrl('http://candygram.neurology.emory.edu:8080');
-            set_collectionId("5c48db6de62914004de6350f");
-            set_folderId('5c49e88de62914004ded6b45');
-            set_fileId('5c4b3d52e62914004df6fd08');
-
-            // placeholder will update once promise is fullfilled; until then, it remains a pleasent greeting.
-            var placeholder = 'hello';
-
-            // Test get_collection_ID
-            get_collection_ID('FG')
-                .then(function (x) {
-                    set_collectionId(x);
-                    placeholder = x;
-                });
-            // Test post_folder
-            get_folder_ID('niftis', get_collectionId())
-                .then(function (x) {
-                    set_folderId(x);
-                    placeholder = x;
-                });
-
-            get_file_ID("set-0_tstat2.nii.gz", folder_id)
-                .then(function (x) {
-                    set_fileId(x);
-                    placeholder = x;
-                });
-
-        } // END Girder API Block
 
         // Papaya Viewer Parameters: Dictionary
         // Used in webixPapaya $init function
-        var params = []; // List of image full-paths
-        params["images"] = imageList; // From file "imageList.js"
-        params["expandable"] = true;
-        params["showControls"] = false;
-        params["showControlBar"] = false;
-        params["showImageButtons"] = false;
+        var layout;
+        var params;
+        // Set default girder API variables:
+        set_girderUrl('http://candygram.neurology.emory.edu:8080');
+        set_collectionId("5c48db6de62914004de6350f"); // "FG"
+        set_folderId('5c51c1d6e62914004d1d376b'); // "niftis_folder/50v50_set-0_2019-M01-D19/"
+        set_fileId('5c51c1f6e62914004d1d3cbd'); // "zipped niftis"
 
-        var DCMZipFile = ''; // DCM
+        build_params(folder_id) // returns params
+            .then(function (x) {
+                params = x;
+                params["expandable"] = true;
+                params["showControls"] = false;
+                params["showControlBar"] = false;
+                params["showImageButtons"] = true;
+                params["smoothDisplay"] = false;
 
-        // Run
-        webix.ready(function () {
-            console.log("webix.ready");
-            setImageParams(params);
-            layout = setupPanels(params);
-            webix.ui(layout);
-            papaya.Container.startPapaya();
+                params["loadingComplete"] = function (x) {
+                    console.log("Images Loaded");
+                    initViz(); // TODO: hide papaya viewer until finished initializing?
+                    setupGrid(); // defines grid, uses variables from papayaViewer
+                } // image loading callback
 
-            { // DCM Block
-                /* JSZipUtils.getBinaryContent: Description : Use an AJAX call to fetch a file (HTTP GET) on the server that served the file. */
-                myFileUrl =
-                    "http://candygram.neurology.emory.edu:8080/api/v1/file/5c4b430ce62914004df6ff72/download"
-                myZipData = new JSZip.external.Promise(function (resolve, reject) { // new Promise
-                    JSZipUtils.getBinaryContent(myFileUrl, function (err, data) { // AJAX GET: downloads file
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve(data);
-                        }
-                    });
-                }).then(function (data) { // myZipData.then()
-                    return JSZip.loadAsync(data); // loads data into new JSZip object
-                }).then(function (zData) { // zData is resolved promise
-                    DCMZipFile = zData;
-                    DCMZipFile.folder("13-AX T1 POST-19694").forEach(function (relativePath, file) {
-                        //console.log("iterating over", relativePath);
-                        //console.log(file);
-                    });
-                    return zData; // myZipData = zData as resolved Promise
-                })
-            } // END DCM Block
+                webix.ready(function () {
+                    console.log("webix.ready");
+                    layout = setupPanels(); // webixLayout.js, defines layout and grid
+                    webix.ui(layout);
+                    console.log(params);
+                    papaya.Container.startPapaya();
+                    // setupGrid();
+                }); // webix callback
 
-        });
+            }) // END build_params
+
+
 
         console.log("End");
     </script>
