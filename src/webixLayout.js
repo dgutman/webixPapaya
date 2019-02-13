@@ -54,10 +54,7 @@ var dtableparams = [{
         header: "Visible",
         width: 60,
         sort: "int",
-        template:"{common.checkbox()}",
-        // editor: "checkbox",
-        checkValue: "1", // Shows up as 'true'
-        uncheckValue: "0" // Shows up as 'false'
+        template: "{common.checkbox()}"
     }
 ]
 
@@ -80,24 +77,23 @@ var dtable = { // Datatable:
             console.log(`Item: ${iname}`);
             papayaContainers[0].viewer.setCurrentScreenVol(layerN);
         },
-        "onCheck":function(rowId,colId,state) { 
-                let item = $$("grid").getItem(rowId); // get name of image for row changed
-                let iname = item.name;
-                let layerN = item.layer;
-                let myViewer = papayaContainers[0].viewer;
-                
-                console.log(state,rowId,colId)
-                    if (state) {
-                        params[iname]["visible"] = 1;
-                        papaya.Container.showImage(0, layerN);
-                        console.log(`Value Changed: ON ${state.value}`);
-                    } else {
-                        params[iname]["visible"] = 0;
-                        papaya.Container.hideImage(0, layerN)
-                        console.log(`Value Changed: OFF ${state.value}`);
-                    }
+        "onCheck": function (rowId, colId, state) {
+            let item = $$("grid").getItem(rowId); // get name of image for row changed
+            let iname = item.name;
+            let layerN = item.layer;
+
+            console.log(state, rowId, colId)
+            if (state) {
+                params[iname]["visible"] = 1;
+                papaya.Container.showImage(0, layerN);
+                console.log(`Value Changed: ON`);
+            } else {
+                params[iname]["visible"] = 0;
+                papaya.Container.hideImage(0, layerN)
+                console.log(`Value Changed: OFF`);
+            }
         },
-        "onAfterEditStop": function (state, editor, ignoreUpdate) {
+        "onAfterEditStop": function (state, editor, ignoreUpdate) { // Alters image based on datatable changes
             if (state.value != state.old) {
                 let item = $$("grid").getItem(editor.row); // get name of image for row changed
                 let iname = item.name;
@@ -139,16 +135,8 @@ var dtable = { // Datatable:
                 }
                 if (col == "visible") {
                     //params[iname]["visible"] = parseInt(state.value);
-                    console.log(`State ${state.value}`);
-                    if (state.value) {
-                        params[iname]["visible"] = 1;
-                        papaya.Container.showImage(0, layerN);
-                        console.log(`Value Changed: ON ${state.value}`);
-                    } else {
-                        params[iname]["visible"] = 0;
-                        papaya.Container.hideImage(0, layerN)
-                        console.log(`Value Changed: OFF ${state.value}`);
-                    }
+                    console.log(`ERROR: Visibility should be Checkbox`);
+
                 }
             } else {
                 console.log("No Change");
@@ -158,7 +146,7 @@ var dtable = { // Datatable:
     }
 }
 
-
+// Defines layout of webix panels, returns layout
 function setupPanels() {
     console.log("setupPanels");
 
@@ -167,22 +155,47 @@ function setupPanels() {
         rows: [{
                 view: "template",
                 template: "Images",
-                type: "header"
+                type: "header",
+                css: {
+                    "text-align": "center",
+                    "font-size": "1.875em",
+                    "font-weight": "bold",
+                    "font-family": "Arial, Helvetica, sans-serif"
+                }
             }, // text
             {
                 view: "template",
                 template: "Girder Folder",
-                type: "header"
+                type: "header",
+                borderless: true
             }, // TODO: Show girder folder name used to get images, allow dynamic changing and image reloading
             //short form
             {
                 view: "combo",
                 id: "girder_folder",
-                label: "Folder",
                 value: "One",
                 options: ["One", "Two", "Three"]
             },
+            {
+                view: "template",
+                type: "header",
+                borderless: true
+            }, // empty space
+            {
+                view: "template",
+                template: "Variables",
+                type: "header",
+                borderless: true
+            }, // text
             dtable, // datatable / grid of image settings
+            {
+                view: "button",
+                id: "swapViewsButton",
+                value: "Swap Views",
+                click: function () {
+                    papayaContainers[0].viewer.rotateViews()
+                }
+            }
         ],
     };
 
@@ -190,7 +203,14 @@ function setupPanels() {
         rows: [{
                 view: "template",
                 template: "Viewer",
-                type: "header"
+                type: "header",
+                css: {
+                    "text-align": "center",
+                    "font-size": "1.875em",
+                    "font-weight": "bold",
+                    "font-family": "Arial, Helvetica, sans-serif"
+                },
+                borderless: true
             }, // Header
             {
                 view: "webixPapaya"
@@ -210,6 +230,7 @@ function setupPanels() {
         iterimages.push(i.toString());
     }
 
+    // not used
     var rightPanel = {
         rows: [{
                 view: "template",
@@ -333,15 +354,7 @@ function setupPanels() {
                     }, // onChange
                 }, // on event
             }, // counter
-            {
-                view: "button",
-                id: "swapViewsButton",
-                inputWidth: 300,
-                value: "Swap Views",
-                click: function () {
-                    papayaContainers[0].viewer.rotateViews()
-                }
-            }
+
             // papayaContainers[0].viewer.goToInitialCoordinate() // resets coordinate marker
             // papayaContainers[0].viewer.currentCoord // outputs marker coordinates
             // papayaContainers[0].viewer.cursorPosition // outputs mouse coordinates
@@ -354,11 +367,11 @@ function setupPanels() {
     // Merge Panels into Layout
     var layout = {
         cols: [leftPanel, {
-            view: "resizer"
-        }, middlePanel, {
-            view: "resizer"
-        }, //rightPanel
-    ]
+                view: "resizer"
+            }, middlePanel, {
+                view: "resizer"
+            }, //rightPanel
+        ]
     };
 
     console.log("Done: setupPanels");

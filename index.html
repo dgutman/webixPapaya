@@ -19,8 +19,6 @@
     <script src="/src/webixPapayaObject.js" type="text/javascript"></script>
     <!-- sample data -->
     <script src="/src/imageList.js" type="text/javascript"></script>
-    <!-- functions -->
-    <script src="/src/setImageParams.js" type="text/javascript"></script>
     <!-- webix Grid Controls -->
     <script src="/src/webixGrid.js" type="text/javascript"></script>
     <!-- webix Layout and Viewer Controls -->
@@ -52,42 +50,43 @@
 
         // Papaya Viewer Parameters: Dictionary
         // Used in webixPapaya $init function
-        var layout;
         var params;
+        var layout; // Used by webix to generate page layout
+
         // Set default girder API variables:
         set_girderUrl('http://candygram.neurology.emory.edu:8080');
         set_collectionId("5c48db6de62914004de6350f"); // "FG"
         set_folderId('5c51c1d6e62914004d1d376b'); // "niftis_folder/50v50_set-0_2019-M01-D19/"
-        set_fileId('5c51c1f6e62914004d1d3cbd'); // "zipped niftis"
 
-        build_params(folder_id) // returns params
-            .then(function (x) {
-                params = x;
-                params["expandable"] = true;
-                params["showControls"] = false;
-                params["showControlBar"] = false;
-                params["showImageButtons"] = true;
-                params["smoothDisplay"] = false;
+        // function starts application:
+        function startPage() {
+            build_params(folder_id) // Connects with Girder using , and returns params
+                .then(function (x) {
+                    params = x;
+                    params["expandable"] = true;
+                    params["showControls"] = false;
+                    params["showControlBar"] = false;
+                    params["showImageButtons"] = false;
+                    params["smoothDisplay"] = false;
 
-                params["loadingComplete"] = function (x) {
-                    console.log("Images Loaded");
-                    initViz(); // TODO: hide papaya viewer until finished initializing?
-                    setupGrid(); // defines grid, uses variables from papayaViewer
-                } // image loading callback
+                    params["loadingComplete"] = function (x) {
+                        console.log("Images Loaded");
+                        initViz(); // TODO: hide papaya viewer until finished initializing?
+                        setupGrid(); // defines grid, uses variables from papayaViewer
+                    } // image loading callback
 
-                webix.ready(function () {
-                    console.log("webix.ready");
-                    layout = setupPanels(); // webixLayout.js, defines layout and grid
-                    webix.ui(layout);
-                    console.log(params);
-                    papaya.Container.startPapaya();
-                    // setupGrid();
-                }); // webix callback
+                    webix.ready(function () {
+                        console.log("webix.ready");
+                        layout = setupPanels(); // webixLayout.js, defines layout and grid
+                        webix.ui(layout);
+                        console.log(params);
+                        papaya.Container.startPapaya();
+                    }); // webix callback
+                }) // END build_params
+        }
 
-            }) // END build_params
-
-
-
+        // Start Application:
+        startPage()
         console.log("End");
     </script>
 </body>
