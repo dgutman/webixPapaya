@@ -54,10 +54,10 @@ var dtableparams = [{
         header: "Visible",
         width: 60,
         sort: "int",
-        template:"{common.checkbox()}"
+        template:"{common.checkbox()}",
         // editor: "checkbox",
-        // checkValue: "1", // Shows up as 'true'
-        // uncheckValue: "0" // Shows up as 'false'
+        checkValue: "1", // Shows up as 'true'
+        uncheckValue: "0" // Shows up as 'false'
     }
 ]
 
