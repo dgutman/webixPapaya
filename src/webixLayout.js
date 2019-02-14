@@ -173,8 +173,8 @@ function setupPanels() {
             {
                 view: "combo",
                 id: "girder_folder",
-                value: "One",
-                options: ["One", "Two", "Three"]
+                value: girderFolderList[0],
+                options: girderFolderList
             },
             {
                 view: "template",
@@ -229,7 +229,7 @@ function setupPanels() {
     for (var i = 0; i < params['imageNames'].length; i++) {
         iterimages.push(i.toString());
     }
-
+/* 
     // not used
     var rightPanel = {
         rows: [{
@@ -362,7 +362,7 @@ function setupPanels() {
             // papayaContainers[0].viewer.setZoomFactor(2) // Zoom in
             // papayaContainers[0].viewer.getZoomString() // how much image is zoomed
         ], // Rows
-    };
+    }; */
 
     // Merge Panels into Layout
     var layout = {

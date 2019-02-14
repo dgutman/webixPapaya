@@ -11,6 +11,7 @@ let collection_id = '';
 let folder_id = '';
 let file_id = '';
 let zipFile = ''; // item
+let girderFolderList = [];
 
 // Setters and Getters:
 function set_girderUrl(url) {
@@ -276,6 +277,24 @@ async function download_zip_item(item_id) {
             return zData;
         })
     return myZipData;
+}
+
+async function get_collection_contents(collection_id) {
+    // Description: Get collection contents as json
+    // Input: ID of collection to explore
+    // prints url used for Girder API call
+    // Return: json describing collection contents
+
+    let fetch_url = `${girder_url}/api/v1/item?collectionId=${collection_id}&limit=50&sort=lowerName&sortdir=1`;
+    console.log(`Fetch URL: ${fetch_url}`);
+
+    // Girder API returns array with json objects
+    let promise = fetch(fetch_url);
+    let output = promise
+        .then(response => response.json())
+        .catch(err => console.error(err));
+
+    return output;
 }
 
 async function get_folder_contents(folder_id) {
