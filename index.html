@@ -64,15 +64,15 @@
             .then(function (x) { // initialize girderFolderDict
                 x.forEach(function (i) {
                     girderFolderDict.push({
-                        folder_id: i._id,
-                        name: i.name
+                        _id: i._id,
+                        value: i.name
                     });
-                    girderFolderNames.push(i.name); // push
+                    girderFolderNames.push(i.value); // push
                 }) // forEach
             }) // then
             .then(function () { // Start Application:
                 console.log(girderFolderDict);
-                startPage(girderFolderDict[0].folder_id);
+                startPage(girderFolderDict[0]._id);
             })
 
         // function starts application:
@@ -98,6 +98,27 @@
                         webix.ui(layout);
                         papaya.Container.startPapaya();
                     }); // webix callback
+                }) // END build_params
+        }
+
+        // function loads new data from new girder folder:
+        function resetPage(id) {
+            build_params(id) // Connects with Girder, returns params
+                .then(function (x) {
+                    params = x;
+                    params["expandable"] = true;
+                    params["showControls"] = false;
+                    params["showControlBar"] = false;
+                    params["showImageButtons"] = false;
+                    params["smoothDisplay"] = false;
+
+                    params["loadingComplete"] = function (x) {
+                        console.log("Images Loaded");
+                        initViz(); // TODO: hide papaya viewer until finished initializing?
+                        setupGrid(); // defines grid, uses variables from papayaViewer
+                    } // image loading callback
+
+                    papaya.Container.resetViewer(0, params);
                 }) // END build_params
         }
 
