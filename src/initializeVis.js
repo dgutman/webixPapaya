@@ -5,7 +5,7 @@ function initViz() {
     // Description: toggles values of all images to match params
     // Input: expects params to be predefined
     params["imageNames"].forEach(function (currentimage) {
-        //console.log(`Current Image: ${currentimage}`);
+        console.log(`Current Image: ${currentimage}`);
         let layerN = params["imageNames"].indexOf(currentimage);
         let myViewer = papayaContainers[0].viewer;
 

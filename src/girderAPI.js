@@ -357,6 +357,7 @@ async function build_params(folder_id) {
     let files = ''; // array of json objects representing nifti files
     let tmpurl = ''; // path to file
     let tmpname = ''; // name of file
+    let aesthetictmp = '';
     let param = get_folder_items(folder_id) //Get folder contents as json
         .then(function (x) {
             files = x;
@@ -367,9 +368,17 @@ async function build_params(folder_id) {
                 tmpurl = `${girder_url}/api/v1/item/${i._id}/download?contentDisposition=attachment`;
                 output['images'].push(tmpurl);
                 tmpname = i.name.replace('.nii.gz', '');
+
+                if (!tmpname.startsWith("MNI")) {
+                    tmpname = tmpname.substring(tmpname.indexOf("_") + 1);
+                }
+
                 output['imageNames'].push(tmpname);
-                output[tmpname] = aesthetic[tmpname];
                 output['mapping'][tmpurl] = tmpname;
+
+                console.log(`Tmpname: ${tmpname}`);
+                //console.log(`Aesthetictmp: ${aesthetictmp}`);
+                output[tmpname] = aesthetic[tmpname]; // aesthetic defined in "randomise_output_aesthetic.js"
             })
             return output; // becomes params
         })
