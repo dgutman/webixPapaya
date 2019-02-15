@@ -52,24 +52,32 @@
         // Used in webixPapaya $init function
         var params;
         var layout; // Used by webix to generate page layout
+        var girderFolderDict = [];
+        var girderFolderNames = [];
 
         // Set default girder API variables:
         set_girderUrl('http://candygram.neurology.emory.edu:8080');
         set_collectionId("5c48db6de62914004de6350f"); // "FG"
-        // set_folderId('5c4bb1fee62914004dfc0cb2'); // "FG/niftis_folder"
-        set_folderId('5c51c1d6e62914004d1d376b'); // "FG/niftis_folder/50v50_set-0_2019-M01-D19/"
-        get_folder_contents(folder_id) //Get folder contents as json
-            .then(function (x) {
+        set_parentId('5c4bb1fee62914004dfc0cb2'); // "FG/niftis_folder"
+        //set_folderId('5c51c1d6e62914004d1d376b'); // "FG/niftis_folder/50v50_set-0_2019-M01-D19/"
+        get_folder_folders(parent_id) //Get folder contents as json
+            .then(function (x) { // initialize girderFolderDict
                 x.forEach(function (i) {
-                    console.log(`Name: ${i.name}`);
-                    console.log(`Type: ${typeof i.name}`);
-                    girderFolderList.push( i.name );
-                })
+                    girderFolderDict.push({
+                        folder_id: i._id,
+                        name: i.name
+                    });
+                    girderFolderNames.push(i.name); // push
+                }) // forEach
+            }) // then
+            .then(function () { // Start Application:
+                console.log(girderFolderDict);
+                startPage(girderFolderDict[0].folder_id);
             })
 
         // function starts application:
-        function startPage() {
-            build_params(folder_id) // Connects with Girder using , and returns params
+        function startPage(id) {
+            build_params(id) // Connects with Girder, returns params
                 .then(function (x) {
                     params = x;
                     params["expandable"] = true;
@@ -88,14 +96,11 @@
                         console.log("webix.ready");
                         layout = setupPanels(); // webixLayout.js, defines layout and grid
                         webix.ui(layout);
-                        console.log(params);
                         papaya.Container.startPapaya();
                     }); // webix callback
                 }) // END build_params
         }
 
-        // Start Application:
-        startPage()
         console.log("End");
     </script>
 </body>

@@ -8,10 +8,10 @@
 // Should be a class/struct etc.
 let girder_url = '';
 let collection_id = '';
+let parent_id = '';
 let folder_id = '';
 let file_id = '';
 let zipFile = ''; // item
-let girderFolderList = [];
 
 // Setters and Getters:
 function set_girderUrl(url) {
@@ -44,6 +44,14 @@ function set_fileId(id) {
 
 function get_fileId() {
     return file_id;
+}
+
+function set_parentId(id) {
+    parent_id = id;
+}
+
+function get_parentId() {
+    return parent_id;
 }
 
 
@@ -247,6 +255,7 @@ async function download_zip_item(item_id) {
     // prints url used for Girder API call
     // prints found file ID
     // Return: ID as promise
+    // WARNING: folder is now hard-coded
 
     /* JSZipUtils.getBinaryContent: Description : Use an AJAX call to fetch a file (HTTP GET) on the server that served the file. */
     //file ID: 5c4b3d52e62914004df6fd08, BUT download link:
@@ -297,11 +306,11 @@ async function get_collection_contents(collection_id) {
     return output;
 }
 
-async function get_folder_contents(folder_id) {
-    // Description: Get folder contents as json
+async function get_folder_items(folder_id) {
+    // Description: Get folder items as json
     // Input: ID of folder to explore
     // prints url used for Girder API call
-    // Return: json describing folder contents
+    // Return: json describing folder items
 
     let fetch_url = `${girder_url}/api/v1/item?folderId=${folder_id}&limit=50&sort=lowerName&sortdir=1`;
     console.log(`Fetch URL: ${fetch_url}`);
@@ -316,6 +325,24 @@ async function get_folder_contents(folder_id) {
 }
 
 
+async function get_folder_folders(folder_id) {
+    // Description: Get folder items as json
+    // Input: ID of folder to explore
+    // prints url used for Girder API call
+    // Return: json describing folder items
+    // /api/v1/folder?parentType=folder&parentId=5c4bb1fee62914004dfc0cb2&limit=50&sort=lowerName&sortdir=1
+    let fetch_url = `${girder_url}/api/v1/folder?parentType=folder&parentId=${folder_id}&limit=50&sort=lowerName&sortdir=1`;
+    console.log(`Fetch URL: ${fetch_url}`);
+
+    // Girder API returns array with json objects
+    let promise = fetch(fetch_url);
+    let output = promise
+        .then(response => response.json())
+        .catch(err => console.error(err));
+
+    return output;
+}
+
 async function build_params(folder_id) {
     // Description: define params object for papaya viewer
     // Input: ID of folder to explore
@@ -326,14 +353,14 @@ async function build_params(folder_id) {
     output['images'] = []; // list of image urls
     output['imageNames'] = []; // lists of image names
     output['mapping'] = {}; // maps url to image name
-    
+
     let files = ''; // array of json objects representing nifti files
     let tmpurl = ''; // path to file
     let tmpname = ''; // name of file
-    let param= get_folder_contents(folder_id) //Get folder contents as json
+    let param = get_folder_items(folder_id) //Get folder contents as json
         .then(function (x) {
             files = x;
-            
+
             // loop through json list of nifti objects to define file_locs and file_names
             files.forEach(function (i) {
                 //console.log(i);
@@ -346,7 +373,7 @@ async function build_params(folder_id) {
             })
             return output; // becomes params
         })
-        return param;
+    return param;
 }
 
 /* 
