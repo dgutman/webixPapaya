@@ -62,6 +62,7 @@ var dtable = { // Datatable:
     view: "datatable",
     id: "grid",
     width: 580,
+    height: 300,
     columns: dtableparams, // column names and ids
     editable: true,
     editaction: "click",
@@ -201,6 +202,7 @@ function setupPanels() {
             { // empty space
                 view: "template",
                 type: "header",
+                height: 20,
                 borderless: true
             }, // empty space
             { // <h> Variables
