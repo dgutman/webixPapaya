@@ -428,8 +428,10 @@ function setupPanels() {
                 ], // Rows
             }; */
     // Merge Panels into Layout
+
     var layout = {
         rows: [
+			//header.createConfig(),
             {
 				cols: [leftPanel, {
 					view: "resizer"

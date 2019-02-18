@@ -385,6 +385,34 @@ async function build_params(folder_id) {
     return param;
 }
 
+function login(sourceParams) {
+    debugger
+	const params = sourceParams ? {
+		username: sourceParams.username || 0,
+		password: sourceParams.password || 0
+	} : {};
+	const tok = `${params.username}:${params.password}`;
+	let hash;
+	try {
+		hash = btoa(tok);
+	}
+	catch (e) {
+		console.log("Invalid character in password or login");
+	}
+	return webix.ajax()
+		.headers({
+			"Authorization": `Basic ${hash}`
+		})
+		.get(`${girder_url}/user/authentication`)
+		.then(result => result.json());
+}
+
+function logout() {
+	return webix.ajax().del(`${girder_url}/user/authentication`)
+		.fail(parseError)
+		.then(result => result.json());
+}
+
 /* 
 { // DCM Block
     var DCMzipFile = ''; // DCM
