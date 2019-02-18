@@ -164,7 +164,7 @@ async function post_folder(folder_name, collection_id) {
     let error_status = 0;
     fetch_options = {
         method: 'POST'
-    }
+    };
 
     let fetch_url = `${girder_url}/api/v1/folder?parentType=collection&parentId=${collection_id}&name=${folder_name}&reuseExisting=true`;
     console.log(`Fetch URL: ${fetch_url}`);
@@ -284,7 +284,7 @@ async function download_zip_item(item_id) {
                 //console.log(file);
             });
             return zData;
-        })
+        });
     return myZipData;
 }
 

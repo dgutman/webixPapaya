@@ -23,7 +23,7 @@ function setImageParams(params) {
         }
         else {
             nonMaskFilename= imageName.substring(imageName.lastIndexOf('/')+1); 
-            params[nonMaskFilename]={}
+            params[nonMaskFilename]={};
             params[nonMaskFilename]["min"]=0;
             params[nonMaskFilename]["max"]=10000; // Non-masks go to 10,000
             if(nonMaskImages == 0){

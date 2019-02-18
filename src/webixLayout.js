@@ -8,6 +8,46 @@ var papayaColorTables = ["Greyscale", "Spectrum",
     "Blue Overlay", "Fire"
 ]
 
+//config may as well include only text, color and date hash
+var sliderEditorStep = 0.05;
+var sliderMinValue = 0;
+var sliderMaxValue = 1;
+
+webix.editors.$popup = {
+	slider:{
+		view: "popup",
+        width: 200,
+		body:{
+		    rows: [
+		        {
+                    view:"slider",
+					type:"alt",
+                    min: sliderMinValue,
+                    max: sliderMaxValue,
+                    step: sliderEditorStep,
+					title: (obj) => {
+                        if (!Number.isInteger(obj.value)) {
+                            obj.value = Number(obj.value);
+                        }
+                        return obj.value.toFixed(2);
+                    }
+                }
+            ]
+		}
+	}
+};
+
+
+webix.editors.sliderEditor = webix.extend({
+	popupType: "slider",
+	getInputNode: function() {
+		return this.getPopup().getBody().getChildViews()[0];
+	},
+	getValue: function () {
+		return this.getInputNode().getValue();
+	}
+}, webix.editors.popup);
+
 var dtableparams = [{
         id: "name",
         header: "Name",
@@ -33,7 +73,7 @@ var dtableparams = [{
         header: "Alpha",
         width: 50,
         sort: "int",
-        editor: "text"
+        editor: "sliderEditor"
     },
     {
         id: "min",
@@ -83,14 +123,14 @@ var dtable = { // Datatable:
             let iname = item.name;
             let layerN = item.layer;
 
-            console.log(state, rowId, colId)
+            console.log(state, rowId, colId);
             if (state) {
                 params[iname]["visible"] = 1;
                 papaya.Container.showImage(0, layerN);
                 console.log(`Value Changed: ON`);
             } else {
                 params[iname]["visible"] = 0;
-                papaya.Container.hideImage(0, layerN)
+                papaya.Container.hideImage(0, layerN);
                 console.log(`Value Changed: OFF`);
             }
         },
@@ -116,13 +156,13 @@ var dtable = { // Datatable:
                     console.log(`Value Changed: alpha ${papayaContainers[0].viewer.screenVolumes[layerN].alpha}`);
                 }
                 if (col == "min") {
-                    console.log(`Value ${state.value}`)
-                    console.log(`IName ${iname}`)
-                    console.log(`Layer ${layerN}`)
+                    console.log(`Value ${state.value}`);
+                    console.log(`IName ${iname}`);
+                    console.log(`Layer ${layerN}`);
                     params[iname]["min"] = state.value;
                     //papayaContainers[0].viewer.screenVolumes[layerN].min = params[iname]["min"];
                     papayaContainers[0].viewer.screenVolumes[layerN].screenMin = parseFloat(params[iname]["min"]);
-                    papayaContainers[0].viewer.screenVolumes[layerN].updateScreenRange()
+                    papayaContainers[0].viewer.screenVolumes[layerN].updateScreenRange();
                     papayaContainers[0].viewer.drawViewer(true, false);
                     //papaya.Container.resetViewer(0);
                     console.log(`Value Changed: min ${state.value}`);
@@ -130,7 +170,7 @@ var dtable = { // Datatable:
                 if (col == "max") {
                     params[iname]["max"] = state.value;
                     papayaContainers[0].viewer.screenVolumes[layerN].screenMax = parseFloat(params[iname]["max"]);
-                    papayaContainers[0].viewer.screenVolumes[layerN].updateScreenRange()
+                    papayaContainers[0].viewer.screenVolumes[layerN].updateScreenRange();
                     papayaContainers[0].viewer.drawViewer(true, false);
                     console.log(`Value Changed: max ${state.value}`);
                 }
@@ -142,10 +182,9 @@ var dtable = { // Datatable:
             } else {
                 console.log("No Change");
             }
-
         }
     }
-}
+};
 
 
 function getDictIndexFromValue(val, dict) {
@@ -388,14 +427,17 @@ function setupPanels() {
                     // papayaContainers[0].viewer.getZoomString() // how much image is zoomed
                 ], // Rows
             }; */
-
     // Merge Panels into Layout
     var layout = {
-        cols: [leftPanel, {
-                view: "resizer"
-            }, middlePanel, {
-                view: "resizer"
-            }, //rightPanel
+        rows: [
+            {
+				cols: [leftPanel, {
+					view: "resizer"
+				}, middlePanel, {
+					view: "resizer"
+				}, //rightPanel
+				]
+            }
         ]
     };
 
