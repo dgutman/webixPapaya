@@ -6,7 +6,12 @@ var papayaColorTables = ["Greyscale", "Spectrum",
     "Hot-and-Cold", "Gold",
     "Red Overlay", "Green Overlay",
     "Blue Overlay", "Fire"
-]
+];
+
+const ID_LOGOUT_PANEL = "id-logout-panel";
+const ID_LOGIN_PANEL = "id-login-panel";
+const ID_WINDOW_LOGIN = "id-window-login";
+const ID_LOGIN_FORM = "id-login-form";
 
 //config may as well include only text, color and date hash
 var sliderEditorStep = 0.05;
@@ -196,6 +201,176 @@ function getDictIndexFromValue(val, dict) {
     return output;
 }
 
+function ajaxLogin(sourceParams) {
+	const params = sourceParams ? {
+		username: sourceParams.username || 0,
+		password: sourceParams.password || 0
+	} : {};
+	const tok = `${params.username}:${params.password}`;
+	let hash;
+	try {
+		hash = btoa(tok);
+	}
+	catch (e) {
+		console.log("Invalid character in password or login");
+	}
+	return webix.ajax()
+		.headers({
+			"Authorization": `Basic ${hash}`
+		})
+		.get(`${girder_url}/api/v1/user/authentication`)
+		.then(result => result.json());
+}
+
+function ajaxLogout() {
+	return webix.ajax().del(`${girder_url}/api/v1/user/authentication`)
+		.fail(err => console.error(err))
+		.then(result => result.json());
+}
+
+function login(params, afterLoginPage) {
+	return ajaxLogin(params).then((data) => {
+		webix.storage.local.put("authToken", data.authToken);
+		webix.storage.local.put("user", data.user);
+		// trigger event
+		showLogoutPanel();
+		refreshPage();
+	});
+}
+
+function refreshPage() {
+	get_folder_folders(parent_id) //Get folder contents as json
+		.then(function (x) { // initialize girderFolderDict
+			x.forEach(function (i) {
+				girderFolderDict.push({
+					_id: i._id,
+					value: i.name
+				});
+				girderFolderNames.push(i.value); // push
+			}) // forEach
+		}) // then
+		.then(function () { // Start Application:
+			console.log(girderFolderDict);
+			resetPage(girderFolderDict[0]._id);
+		})
+}
+
+function logout() {
+	ajaxLogout().then(() => {
+		webix.storage.local.remove("user");
+		webix.storage.local.remove("authToken");
+	});
+	$$(ID_LOGIN_PANEL).show();
+	refreshPage();
+}
+
+function getToken() {
+	const authToken = webix.storage.local.get("authToken");
+	if (!authToken) {
+		return null;
+	}
+	return authToken.token;
+}
+
+
+function isLoggedIn() {
+	return getToken() && getUserInfo();
+}
+
+function getUserInfo() {
+	return webix.storage.local.get("user");
+}
+
+function cancelLogic() {
+	const form = $$(ID_LOGIN_FORM);
+	const win = form.getTopParentView();
+	win.hide();
+	form.elements["error-label"].hide();
+}
+
+function togglePasswordVisibility(elem) {
+	if (elem.config.icon === "eye") {
+		elem.define("type", "password");
+		elem.define("icon", "eye-slash");
+	}
+	else {
+		elem.define("type", "base");
+		elem.define("icon", "eye");
+	}
+	elem.refresh();
+}
+
+webix.protoUI({
+	name: "passwordInput",
+	$cssName: "search",
+	$init() {
+		this.attachEvent("onSearchIconClick", (ev) => {
+			togglePasswordVisibility($$(ev.target));
+		});
+	},
+	defaults: {
+		type: "password",
+		icon: "eye-slash"
+	}
+}, webix.ui.search);
+
+function calcUserMenuWidth(str) {
+	return (str && str.length ? str.length * 20 : 1) <= 150 || 150;
+}
+
+function createConfig(firstName, lastName) {
+	const name = `${firstName || ""} ${lastName || ""}`;
+	const cols = [
+		{},
+		{
+			rows: [
+				{},
+				{
+					view: "menu",
+					openAction: "click",
+                    css: "header-base-menu",
+					width: calcUserMenuWidth(name),
+					data: [
+						{
+							id: "name",
+							value: `<span style="margin-left: -10px; width: ${calcUserMenuWidth(name)}px;" title="${firstName} ${lastName}"}>${name}</span>`,
+							submenu: [
+								{id: "logout", value: "<span class='fa fa-arrow-right'></span> Logout"}
+							]
+						}
+					],
+					type: {
+						subsign: true
+					},
+					on: {
+						onMenuItemClick(id) {
+							switch (id) {
+								case "logout": {
+									logout();
+									break;
+								}
+								default: {
+									break;
+								}
+							}
+						}
+					}
+				},
+				{}
+			]
+		}
+	];
+
+	return cols;
+}
+
+function showLogoutPanel() {
+	const user = getUserInfo();
+	const cols = createConfig(user.firstName, user.lastName);
+	const logoutPanel = $$(ID_LOGOUT_PANEL);
+	webix.ui(cols, logoutPanel);
+	logoutPanel.show(false, false);
+}
 
 // Defines layout of webix panels, returns layout
 function setupPanels() {
@@ -263,6 +438,7 @@ function setupPanels() {
     };
 
     var middlePanel = {
+        css: "papaya-viewer-layout",
         rows: [{
                 view: "template",
                 template: "Viewer",
@@ -429,9 +605,198 @@ function setupPanels() {
             }; */
     // Merge Panels into Layout
 
+	const loginForm = {
+		view: "form",
+        id: ID_LOGIN_FORM,
+		width: 600,
+		rules: {
+			"username": webix.rules.isNotEmpty,
+			"password": webix.rules.isNotEmpty
+		},
+		elements: [
+			{
+				view: "label",
+				name: "error-label",
+				label: "",
+				align: "center",
+				hidden: true
+			},
+			{
+				view: "text",
+				name: "username",
+				label: "Login or Email",
+				placeholder: "Enter Login or Email",
+				invalidMessage: "Enter Login or Email"
+			},
+			{
+				view: "passwordInput",
+				name: "password",
+				label: "Password",
+				placeholder: "Enter password",
+				invalidMessage: "Enter password"
+			},
+			{
+				cols: [
+					{},
+					{
+						view: "button",
+						css: "btn-contour",
+						width: 80,
+						name: "cancelButton",
+						value: "Cancel",
+						on: {
+							onItemClick: cancelLogic
+						}
+					},
+					{width: 20},
+					{
+						view: "button",
+						css: "btn",
+						width: 80,
+						name: "loginButton",
+						value: "Login",
+						hotkey: "enter",
+						on: {
+							onItemClick() {
+								const form = this.getFormView();
+								const win = this.getTopParentView();
+								webix.extend(win, webix.ProgressBar);
+								win.showProgress();
+								if (form.validate()) {
+									// showAfterLoginPage has been setted after window initialisation or before opening
+									login(form.getValues(), win.showAfterLoginPage)
+										.then(() => {
+											delete win.showAfterLoginPage;
+											form.clear();
+											form.elements["error-label"].hide();
+											win.hideProgress();
+											this.getTopParentView().hide();
+										})
+										.fail((xhr) => {
+											if (xhr.status === 401) {
+												const errorLabel = form.elements["error-label"];
+												errorLabel.setValue("Login or password are not correct");
+												errorLabel.show();
+											}
+											win.hideProgress();
+										});
+								}
+								else {
+									win.hideProgress();
+								}
+							}
+						}
+					}
+				]
+			}
+		],
+		elementsConfig: {
+			labelWidth: 120
+		}
+	};
+
+	const loginWindow = {
+		view: "window",
+		id: ID_WINDOW_LOGIN,
+		modal: true,
+		position: "center",
+		headHeight: 30,
+		move: true,
+		head: {
+			view: "toolbar",
+			borderless: true,
+			type: "clean",
+			height: 32,
+			cols: [
+				{
+					template: "Login",
+					borderless: true,
+					autoheight: true
+				},
+				{gravity: 0.001},
+				{
+					view: "button",
+					type: "icon",
+                    icon: "fa fa-times",
+					width: 30,
+					align: "right",
+					on: {
+						onItemClick() {
+							this.getTopParentView().hide();
+							if (typeof cancelLogic === "function") {
+								cancelLogic();
+							}
+						}
+					}
+				},
+				{width: 5}
+			]
+		},
+		body: loginForm
+	};
+
+	const logo = {
+		template: "Webix Papaya",
+        css: "main-header-logo",
+		borderless: true
+	};
+
+	const loginMenu = {
+		template: "<span class='menu-login login-menu-item'>Login</span>",
+		css: "login-menu",
+		borderless: true,
+		width: 150,
+		onClick: {
+			"menu-login": () => {
+				const loginWindowView = $$(ID_WINDOW_LOGIN) || webix.ui(loginWindow);
+				loginWindowView.show();
+			}
+		}
+	};
+
+	const loginPanel = {
+		id: ID_LOGIN_PANEL,
+		cols: [
+			{},
+			loginMenu,
+		]
+	};
+
+	const logoutPanel = {
+		id: ID_LOGOUT_PANEL,
+		cols: []
+	};
+
+	const userPanel = {
+		view: "multiview",
+		css: "userbar",
+		animate: false,
+		cells: [
+			loginPanel,
+			logoutPanel
+		]
+	};
+
+	const header = {
+		height: 60,
+		width: 1220,
+        css: "main-header",
+		cols: [
+            {gravity: 0.5},
+            {
+                rows: [
+                    {height: 20},
+					logo
+                ]
+            },
+			userPanel,
+            {gravity: 0.5}
+		]
+	};
+
     var layout = {
         rows: [
-			//header.createConfig(),
+			header,
             {
 				cols: [leftPanel, {
 					view: "resizer"
