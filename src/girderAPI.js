@@ -365,7 +365,7 @@ async function build_params(folder_id) {
             // loop through json list of nifti objects to define file_locs and file_names
             files.forEach(function (i) {
                 // Check if maxfiles already loaded:
-                if(maxfiles ==0){
+                if (maxfiles == 0) {
                     // Do not load any more files
                     return;
                 }
@@ -383,10 +383,20 @@ async function build_params(folder_id) {
                 output['mapping'][tmpurl] = tmpname;
 
                 console.log(`Tmpname: ${tmpname}`);
-                //console.log(`Aesthetictmp: ${aesthetictmp}`);
-                output[tmpname] = aesthetic[tmpname]; // aesthetic defined in "randomise_output_aesthetic.js"
+                if (aesthetic[tmpname]) {
+                    output[tmpname] = aesthetic[tmpname]; // aesthetic defined in "randomise_output_aesthetic.js"
+                } else {
+                    output[tmpname] = {
+                        "name": tmpname,
+                        "min": 0,
+                        "max": 1,
+                        "lut": "Fire",
+                        "alpha": 1,
+                        "visible": 0
+                    }
+                }
 
-                maxfiles = maxfiles-1;
+                maxfiles = maxfiles - 1;
             })
             return output; // becomes params
         })
