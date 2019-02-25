@@ -367,7 +367,7 @@ async function build_params(folder_id) {
                 // Check if maxfiles already loaded:
                 if(maxfiles ==0){
                     // Do not load any more files
-                    continue;
+                    return;
                 }
 
                 //console.log(i);
