@@ -361,9 +361,15 @@ async function build_params(folder_id) {
     let param = get_folder_items(folder_id) //Get folder contents as json
         .then(function (x) {
             files = x;
-
+            maxfiles = 8; // papayaViewer cannot load more than 8 images
             // loop through json list of nifti objects to define file_locs and file_names
             files.forEach(function (i) {
+                // Check if maxfiles already loaded:
+                if(maxfiles ==0){
+                    // Do not load any more files
+                    continue;
+                }
+
                 //console.log(i);
                 tmpurl = `${girder_url}/api/v1/item/${i._id}/download?contentDisposition=attachment`;
                 output['images'].push(tmpurl);
@@ -379,6 +385,8 @@ async function build_params(folder_id) {
                 console.log(`Tmpname: ${tmpname}`);
                 //console.log(`Aesthetictmp: ${aesthetictmp}`);
                 output[tmpname] = aesthetic[tmpname]; // aesthetic defined in "randomise_output_aesthetic.js"
+
+                maxfiles = maxfiles-1;
             })
             return output; // becomes params
         })

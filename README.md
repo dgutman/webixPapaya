@@ -2,11 +2,14 @@
 Integration of Papaya.js and Webix
 Data loaded from existing Girder databases
 
+# Build application (if Github source changed):
+docker build --tag fgiuste/nodejs:webixPapaya .
+
 # Run application:
 ## Ensure image is up-to-date:
 docker pull fgiuste/nodejs:webixPapaya
 ## Run application on port {freeport}
-docker run -d --rm -p{freeport}:8888 fgiuste/nodejs:webixPapaya
+docker run -d --rm -p{freeport}:8888 --name webixPapaya fgiuste/nodejs:webixPapaya
 
 
 ## Getting started
