@@ -58,7 +58,8 @@
         // Set default girder API variables:
         set_girderUrl('http://candygram.neurology.emory.edu:8080');
         set_collectionId("5c48db6de62914004de6350f"); // "FG"
-        set_parentId('5c4bb1fee62914004dfc0cb2'); // "FG/niftis_folder"
+        //set_parentId('5c4bb1fee62914004dfc0cb2'); // "FG/niftis_folder"
+        set_parentId('5c743889e62914004d6f974c') // FG/HCP_TractographyData/SubjectRegistrationResults/DTI_Space
         //set_folderId('5c51c1d6e62914004d1d376b'); // "FG/niftis_folder/50v50_set-0_2019-M01-D19/"
         get_folder_folders(parent_id) //Get folder contents as json
             .then(function (x) { // initialize girderFolderDict

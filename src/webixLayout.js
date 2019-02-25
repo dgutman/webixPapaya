@@ -137,7 +137,6 @@ var dtable = { // Datatable:
                 if (col == "visible") {
                     //params[iname]["visible"] = parseInt(state.value);
                     console.log(`ERROR: Visibility should be Checkbox`);
-
                 }
             } else {
                 console.log("No Change");
