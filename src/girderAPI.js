@@ -361,7 +361,7 @@ async function build_params(folder_id) {
     let param = get_folder_items(folder_id) //Get folder contents as json
         .then(function (x) {
             files = x;
-            maxfiles = 8; // papayaViewer cannot load more than 8 images
+            let maxfiles = 8; // papayaViewer cannot load more than 8 images
             // loop through json list of nifti objects to define file_locs and file_names
             files.forEach(function (i) {
                 // Check if maxfiles already loaded:
