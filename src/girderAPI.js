@@ -12,7 +12,13 @@ let parent_id = '';
 let folder_id = '';
 let file_id = '';
 let zipFile = ''; // item
+var fetch_params = {};
 
+if (isLoggedIn()) {
+	fetch_params['headers'] = {
+	    "Girder-Token": getToken()
+    }
+}
 // Setters and Getters:
 function set_girderUrl(url) {
     girder_url = url;
@@ -102,7 +108,7 @@ async function get_collection_ID(collection_name) {
     //console.log(`Fetch URL: ${fetch_url}`);
 
     // Girder API returns array with json objects
-    let promise = fetch(fetch_url);
+    let promise = fetch(fetch_url, fetch_params);
     let output = promise
         .then(response => response.json())
         .catch(err => console.error(err));
@@ -134,7 +140,7 @@ async function get_folder_ID(folder_name, collection_id) {
     //console.log(`Fetch URL: ${fetch_url}`);
 
     // Girder API returns array with json objects
-    let promise = fetch(fetch_url);
+    let promise = fetch(fetch_url, fetch_params);
     let output = promise
         .then(response => response.json())
         .catch(err => console.error(err));
@@ -162,10 +168,13 @@ async function post_folder(folder_name, collection_id) {
     // Return: ID as promise
 
     let error_status = 0;
-    fetch_options = {
+    var fetch_options = {
         method: 'POST'
-    }
+    };
+    if (fetch_params instanceof Object && fetch_options.hasOwnProperty("Girder-Token")) {
+        fetch_options['Girder-Token'] = getToken();
 
+    }
     let fetch_url = `${girder_url}/api/v1/folder?parentType=collection&parentId=${collection_id}&name=${folder_name}&reuseExisting=true`;
     console.log(`Fetch URL: ${fetch_url}`);
 
@@ -211,7 +220,7 @@ async function get_file_ID(file_name, folder_id) {
     //console.log(`Fetch URL: ${fetch_url}`);
 
     // Girder API returns array with json objects
-    let promise = fetch(fetch_url);
+    let promise = fetch(fetch_url, fetch_params);
     let output = promise
         .then(response => response.json())
         .catch(err => console.error(err));
@@ -239,7 +248,7 @@ async function download_file(item_id) {
     console.log(`Fetch URL: ${fetch_url}`);
 
     // Girder API returns array with json objects
-    let promise = fetch(fetch_url);
+    let promise = fetch(fetch_url, fetch_params);
     let output = promise
         .then(response => {
             test_item = response.body;
@@ -266,6 +275,63 @@ async function download_zip_item(item_id) {
     console.log(`Fetch URL2: ${fetch_url}`);
 
     let myZipData = new JSZip.external.Promise(function (resolve, reject) { // new Promise
+            JSZipUtils.getBinaryContent = function(path, callback, auth) {
+				/*
+				 * Here is the tricky part : getting the data.
+				 * In firefox/chrome/opera/... setting the mimeType to 'text/plain; charset=x-user-defined'
+				 * is enough, the result is in the standard xhr.responseText.
+				 * cf https://developer.mozilla.org/En/XMLHttpRequest/Using_XMLHttpRequest#Receiving_binary_data_in_older_browsers
+				 * In IE <= 9, we must use (the IE only) attribute responseBody
+				 * (for binary data, its content is different from responseText).
+				 * In IE 10, the 'charset=x-user-defined' trick doesn't work, only the
+				 * responseType will work :
+				 * http://msdn.microsoft.com/en-us/library/ie/hh673569%28v=vs.85%29.aspx#Binary_Object_upload_and_download
+				 *
+				 * I'd like to use jQuery to avoid this XHR madness, but it doesn't support
+				 * the responseType attribute : http://bugs.jquery.com/ticket/11461
+				 */
+				try {
+					var xhr = createXHR();
+					if (auth) {
+						xhr.setRequestHeader("Girder-Token", getToken());
+					}
+					xhr.open('GET', path, true);
+
+					// recent browsers
+					if ("responseType" in xhr) {
+						xhr.responseType = "arraybuffer";
+					}
+
+					// older browser
+					if(xhr.overrideMimeType) {
+						xhr.overrideMimeType("text/plain; charset=x-user-defined");
+					}
+
+					xhr.onreadystatechange = function(evt) {
+						var file, err;
+						// use `xhr` and not `this`... thanks IE
+						if (xhr.readyState === 4) {
+							if (xhr.status === 200 || xhr.status === 0) {
+								file = null;
+								err = null;
+								try {
+									file = JSZipUtils._getBinaryFromXHR(xhr);
+								} catch(e) {
+									err = new Error(e);
+								}
+								callback(err, file);
+							} else {
+								callback(new Error("Ajax error for " + path + " : " + this.status + " " + this.statusText), null);
+							}
+						}
+					};
+
+					xhr.send();
+
+				} catch (e) {
+					callback(new Error(e), null);
+				}
+			};
             JSZipUtils.getBinaryContent(fetch_url, function (err, data) { // AJAX GET: downloads file
                 if (err) {
                     reject(err);
@@ -284,7 +350,7 @@ async function download_zip_item(item_id) {
                 //console.log(file);
             });
             return zData;
-        })
+        });
     return myZipData;
 }
 
@@ -298,7 +364,7 @@ async function get_collection_contents(collection_id) {
     console.log(`Fetch URL: ${fetch_url}`);
 
     // Girder API returns array with json objects
-    let promise = fetch(fetch_url);
+    let promise = fetch(fetch_url, fetch_params);
     let output = promise
         .then(response => response.json())
         .catch(err => console.error(err));
@@ -316,7 +382,7 @@ async function get_folder_items(folder_id) {
     console.log(`Fetch URL: ${fetch_url}`);
 
     // Girder API returns array with json objects
-    let promise = fetch(fetch_url);
+    let promise = fetch(fetch_url, fetch_params);
     let output = promise
         .then(response => response.json())
         .catch(err => console.error(err));
@@ -335,12 +401,16 @@ async function get_folder_folders(folder_id) {
     console.log(`Fetch URL: ${fetch_url}`);
 
     // Girder API returns array with json objects
-    let promise = fetch(fetch_url);
+    let promise = fetch(fetch_url, fetch_params);
     let output = promise
         .then(response => response.json())
         .catch(err => console.error(err));
 
     return output;
+}
+
+function setTokenIntoUrl(token, symbol) {
+	return token ? `${symbol}token=${token}` : "";
 }
 
 async function build_params(folder_id) {
@@ -371,7 +441,7 @@ async function build_params(folder_id) {
                 }
 
                 //console.log(i);
-                tmpurl = `${girder_url}/api/v1/item/${i._id}/download?contentDisposition=attachment`;
+                tmpurl = `${girder_url}/api/v1/item/${i._id}/download?contentDisposition=attachment${setTokenIntoUrl(getToken(), "&")}`;
                 output['images'].push(tmpurl);
                 tmpname = i.name.replace('.nii.gz', '');
 
