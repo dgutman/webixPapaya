@@ -455,7 +455,7 @@ async function build_params(folder_id) {
                 console.log(`Tmpname: ${tmpname}`);
                 if (aesthetic[tmpname]) {
                     output[tmpname] = aesthetic[tmpname]; // aesthetic defined in "randomise_output_aesthetic.js"
-                } else {
+                } else { // default aesthetic values
                     output[tmpname] = {
                         "name": tmpname,
                         "min": 0,
