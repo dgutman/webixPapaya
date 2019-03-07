@@ -16,8 +16,8 @@ function setupGrid() { // initialize grid data from loaded images
             "layer": layerN,
             "lut": params[currentimage]["lut"],
             "alpha": params[currentimage]["alpha"],
-            "min": Math.round(papayaContainers[0].viewer.screenVolumes[layerN].screenMin * 100) / 100, //params[currentimage]["min"],
-            "max": Math.round(papayaContainers[0].viewer.screenVolumes[layerN].screenMax * 100) / 100, //params[currentimage]["max"],
+            "min": params[currentimage]["min"], // Math.round(papayaContainers[0].viewer.screenVolumes[layerN].screenMin * 100) / 100,
+            "max": params[currentimage]["max"], //Math.round(papayaContainers[0].viewer.screenVolumes[layerN].screenMax * 100) / 100,
             "visible": params[currentimage]["visible"] == 1 ? 1 : 0
         };
 
