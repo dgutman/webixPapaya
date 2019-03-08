@@ -63,7 +63,6 @@ var aesthetic = {
         "alpha": 0.2,
         "visible": 1
     },
-
     "brain": {
         "name": "brain",
         "min": 0,
@@ -96,8 +95,40 @@ var aesthetic = {
         "alpha": 1,
         "visible": 0
     },
+    "BasalForebrain_Left_trans": {
+        "name": "BasalForebrain_Left_trans",
+        "min": 0,
+        "max": 1,
+        "lut": "Greyscale",
+        "alpha": 1,
+        "visible": 0
+    },
+    "BasalForebrain_Right_trans": {
+        "name": "BasalForebrain_Right_trans",
+        "min": 0,
+        "max": 1,
+        "lut": "Greyscale",
+        "alpha": 1,
+        "visible": 0
+    },
     "Hypothalamus_Bilat_trans": {
         "name": "Hypothalamus_Bilat_trans",
+        "min": 0,
+        "max": 1,
+        "lut": "Greyscale",
+        "alpha": 1,
+        "visible": 0
+    },
+    "Hypothalamus_Left_trans": {
+        "name": "Hypothalamus_Left_trans",
+        "min": 0,
+        "max": 1,
+        "lut": "Greyscale",
+        "alpha": 1,
+        "visible": 0
+    },
+    "Hypothalamus_Right_trans": {
+        "name": "Hypothalamus_Right_trans",
         "min": 0,
         "max": 1,
         "lut": "Greyscale",
@@ -109,7 +140,7 @@ var aesthetic = {
         "min": 0,
         "max": 1,
         "lut": "Green Overlay",
-        "alpha": 1,
-        "visible": 0
+        "alpha": 0.5,
+        "visible": 1
     }
 }
