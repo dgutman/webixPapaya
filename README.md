@@ -42,3 +42,7 @@ npm install --save jquery
 
 ### Run app (within githib repository):
 http-server -a localhost -p 8080 -c-1
+
+# Run with Docker:
+port=8777
+docker run -d --rm -p ${port}:8888 --name webixPapaya fgiuste/nodejs:webixPapaya
