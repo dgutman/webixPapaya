@@ -138,7 +138,7 @@ var aesthetic = {
     "Nodif": {
         "name": "Nodif",
         "min": 0,
-        "max": 1,
+        "max": 10000,
         "lut": "Green Overlay",
         "alpha": 0.5,
         "visible": 1
