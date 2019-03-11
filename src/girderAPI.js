@@ -460,7 +460,7 @@ async function build_params(folder_id) {
                         "name": tmpname,
                         "min": 0,
                         "max": 1,
-                        "lut": "Fire",
+                        "lut": "Greyscale",
                         "alpha": 1,
                         "visible": 0
                     }

@@ -108,8 +108,8 @@
         // function loads new data from new girder folder:
         function resetPage(id) {
             /* because of papays js bug, needs to be fixed
-            TODO fix bug after issue report https://github.com/rii-mango/Papaya/issues/155
-            //document.location.reload(); */
+            TODO fix bug after issue report https://github.com/rii-mango/Papaya/issues/155 */
+            //document.location.reload();
             build_params(id) // Connects with Girder, returns params
                 .then(function (x) {
                     params = x;

@@ -68,7 +68,7 @@ var aesthetic = {
         "min": 0,
         "max": 10000,
         "lut": "Fire",
-        "alpha": 0.8,
+        "alpha": 1,
         "visible": 1
     },
     "BA17_bilat_trans": {
@@ -136,6 +136,14 @@ var aesthetic = {
         "visible": 0
     },
     "Nodif": {
+        "name": "Nodif",
+        "min": 0,
+        "max": 10000,
+        "lut": "Green Overlay",
+        "alpha": 0.5,
+        "visible": 1
+    },
+    "nodif": {
         "name": "Nodif",
         "min": 0,
         "max": 10000,
