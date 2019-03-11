@@ -71,6 +71,14 @@ var aesthetic = {
         "alpha": 1,
         "visible": 1
     },
+    "brain_mask": {
+        "name": "brain_mask",
+        "min": 0,
+        "max": 1,
+        "lut": "Greyscale",
+        "alpha": 0.4,
+        "visible": 0
+    },
     "BA17_bilat_trans": {
         "name": "BA17_bilat_trans",
         "min": 0,
@@ -139,7 +147,7 @@ var aesthetic = {
         "name": "Nodif",
         "min": 0,
         "max": 10000,
-        "lut": "Green Overlay",
+        "lut": "Greyscale",
         "alpha": 0.5,
         "visible": 1
     },
@@ -147,7 +155,7 @@ var aesthetic = {
         "name": "Nodif",
         "min": 0,
         "max": 10000,
-        "lut": "Green Overlay",
+        "lut": "Greyscale",
         "alpha": 0.5,
         "visible": 1
     }
