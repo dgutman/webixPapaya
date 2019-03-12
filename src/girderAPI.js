@@ -413,6 +413,24 @@ function setTokenIntoUrl(token, symbol) {
     return token ? `${symbol}token=${token}` : "";
 }
 
+function getFolderMetadata(folder_id) {
+    // Description: Get folder metadata
+    // Input: ID of folder to obtain metadata from
+    // prints url used for Girder API call
+    // Return: json of metadata
+    // http://candygram.neurology.emory.edu:8080/api/v1/folder/5c86d6f0e62914004d776c70
+    let fetch_url = `${girder_url}/api/v1/folder/${folder_id}`;
+    console.log(`Fetch URL: ${fetch_url}`);
+
+    // Girder API returns array with json objects
+    let promise = fetch(fetch_url, fetch_params);
+    let output = promise
+        .then(response => response.json())
+        .catch(err => console.error(err));
+
+    return output;
+}
+
 async function build_params(folder_id) {
     // Description: define params object for papaya viewer
     // Input: ID of folder to explore
