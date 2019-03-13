@@ -107,7 +107,7 @@ var dtable = { // Datatable:
     view: "datatable",
     id: "grid",
     width: 580,
-    height: 300,
+    height: 600,
     columns: dtableparams, // column names and ids
     editable: true,
     editaction: "click",

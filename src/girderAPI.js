@@ -413,11 +413,11 @@ function setTokenIntoUrl(token, symbol) {
     return token ? `${symbol}token=${token}` : "";
 }
 
-function getFolderMetadata(folder_id) {
-    // Description: Get folder metadata
-    // Input: ID of folder to obtain metadata from
+function getFolderData(folder_id) {
+    // Description: Get folder Data
+    // Input: ID of folder to obtain Data from
     // prints url used for Girder API call
-    // Return: json of metadata
+    // Return: json of Data
     // http://candygram.neurology.emory.edu:8080/api/v1/folder/5c86d6f0e62914004d776c70
     let fetch_url = `${girder_url}/api/v1/folder/${folder_id}`;
     console.log(`Fetch URL: ${fetch_url}`);
@@ -437,59 +437,55 @@ async function build_params(folder_id) {
     // prints url used for Girder API call
     // Return: json describing folder contents
     // output == params
+
     let output = [];
     output['images'] = []; // list of image urls
     output['imageNames'] = []; // lists of image names
-    output['mapping'] = {}; // maps url to image name
-
-    let files = ''; // array of json objects representing nifti files
-    let tmpurl = ''; // path to file
+    output['fullImageNames'] = []; // lists of full image names
+    output['mapping'] = {}; // maps download URL to image name
+    let tmpurl = '';
     let tmpname = ''; // name of file
 
-    papaya.viewer.Viewer.MAX_OVERLAYS = maxfiles; // Changes max overlays
+    folderData = getFolderData(folder_id);
+    let param = folderData.then(function (fdata) {
+        console.log(fdata['meta']);
+        output['images'] = fdata['meta']['imageList']; // Download URL of images
+        output['fullImageNames'] = fdata['meta']['imageNames']; // Full image names
+        papayaSpec = fdata['meta']['papayaSpec'];
+        
+        for (let i = 0; i < output['images'].length; i++) {
+            tmpname = output['fullImageNames'][i]; // full image name
+            tmpname = tmpname.replace('.nii.gz', '');
+            if (!tmpname.startsWith("MNI")) {
+                tmpname = tmpname.substring(tmpname.indexOf("_") + 1);
+            }
 
-    let param = get_folder_items(folder_id) //Get folder contents as json
-        .then(function (x) {
-            files = x;
+            // shortened name used to refer to image:
+            console.log('tmpname: ' + tmpname);
+            output['imageNames'].push(tmpname);
 
-            // loop through json list of nifti objects to define file_locs and file_names
-            files.forEach(function (i) {
-                // Check if maxfiles already loaded:
-                if (maxfiles == 0) {
-                    // Do not load any more files
-                    return;
+            // URL mapping to names:
+            tmpurl = fdata['meta']['imageList'][i];
+            output['mapping'][tmpurl] = tmpname;
+
+            // Image specifications:
+            if (papayaSpec[tmpname]) {
+                output[tmpname] = papayaSpec[tmpname]; // papayaSpec defined in subject folder metadata
+            } else { // default papayaSpec values
+                output[tmpname] = {
+                    "name": tmpname,
+                    "min": 0,
+                    "max": 1,
+                    "lut": "Greyscale",
+                    "alpha": 1,
+                    "visible": 0
                 }
+            }
 
-                //console.log(i);
-                tmpurl = `${girder_url}/api/v1/item/${i._id}/download?contentDisposition=attachment${setTokenIntoUrl(getToken(), "&")}`;
-                output['images'].push(tmpurl);
-                tmpname = i.name.replace('.nii.gz', '');
-
-                if (!tmpname.startsWith("MNI")) {
-                    tmpname = tmpname.substring(tmpname.indexOf("_") + 1);
-                }
-
-                output['imageNames'].push(tmpname);
-                output['mapping'][tmpurl] = tmpname;
-
-                console.log(`Tmpname: ${tmpname}`);
-                if (aesthetic[tmpname]) {
-                    output[tmpname] = aesthetic[tmpname]; // aesthetic defined in "randomise_output_aesthetic.js"
-                } else { // default aesthetic values
-                    output[tmpname] = {
-                        "name": tmpname,
-                        "min": 0,
-                        "max": 1,
-                        "lut": "Greyscale",
-                        "alpha": 1,
-                        "visible": 0
-                    }
-                }
-
-                maxfiles = maxfiles - 1;
-            })
-            return output; // becomes params
-        })
+            console.log(tmpname);
+        }
+        return output; // becomes params
+    });
     return param;
 }
 

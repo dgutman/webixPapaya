@@ -7,6 +7,7 @@ function initViz() {
     params["imageNames"].forEach(function (currentimage) {
         console.log(`Current Image: ${currentimage}`);
         let layerN = params["imageNames"].indexOf(currentimage);
+        console.log('layerN: '+layerN);
         let myViewer = papayaContainers[0].viewer;
 
         // Visibility:

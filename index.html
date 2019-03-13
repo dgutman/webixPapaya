@@ -51,11 +51,15 @@
         // Papaya Viewer Parameters: Dictionary
         // Used in webixPapaya $init function
         var params;
+        var maxFiles = 20; // papayaViewer cannot load more than $maxFiles images
         var layout; // Used by webix to generate page layout
         var girderFolderDict = [];
         var girderFolderNames = [];
-        var maxfiles = 12; // papayaViewer cannot load more than $maxfiles images
-
+        var folderData; // Subject folder data containing metadata
+        var metadata; // Subject folder's metadata
+        var imageList;
+        var imageNames;
+        var papayaSpec;
 
         // Set default girder API variables:
         set_girderUrl('http://candygram.neurology.emory.edu:8080');
@@ -74,12 +78,12 @@
             }) // then
             .then(function () { // Start Application:
                 console.log(girderFolderDict);
-                startPage(girderFolderDict[0]._id);
+                startPage(girderFolderDict[0]._id); // Start App on first subject found within Parent folder
             })
 
         // function starts application:
         function startPage(id) {
-            build_params(id) // Connects with Girder, returns params
+            build_params(id) // returns params
                 .then(function (x) {
                     params = x;
                     params["expandable"] = true;
@@ -88,7 +92,7 @@
                     params["showImageButtons"] = false;
                     params["smoothDisplay"] = false;
 
-                    params["loadingComplete"] = function (x) {
+                    params["loadingComplete"] = function (x) { // On image load
                         console.log("Images Loaded");
                         initViz(); // TODO: hide papaya viewer until finished initializing?
                         setupGrid(); // defines grid, uses variables from papayaViewer
@@ -102,16 +106,15 @@
                             showLogoutPanel();
                         }
                         papaya.Container.startPapaya();
+                        papaya.viewer.Viewer.MAX_OVERLAYS = maxFiles; // Changes max overlays
                     }); // webix callback
                 }) // END build_params
         }
 
         // function loads new data from new girder folder:
         function resetPage(id) {
-            /* because of papays js bug, needs to be fixed
-            TODO fix bug after issue report https://github.com/rii-mango/Papaya/issues/155 */
             //document.location.reload();
-            build_params(id) // Connects with Girder, returns params
+            build_params(id) // returns params
                 .then(function (x) {
                     params = x;
                     params["expandable"] = true;
