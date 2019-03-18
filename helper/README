@@ -2,10 +2,12 @@
 port=8123
 githubDir='/home/fgiuste/Github'
 subjectDir='/HCP_Data/HCP_BedpostData'
+outputDir='/HCP_Data/NipypeScratch'
 docker run -it --rm \
 -p ${port}:8888 \
 -v ${githubDir}:/code/Github:rw \
 -v ${subjectDir}:/data/HCP_BedpostData:rw \
+-v ${outputDir}:/data/NipypeScratch:rw \
 --name webixPapayaHelper fgiuste/base:neuro
 
 # Go to /
