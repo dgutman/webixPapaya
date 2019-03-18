@@ -14,3 +14,4 @@ docker run -it --rm \
 cd /
 # run jupyter-notebook:
 jupyter-notebook
+# Detach Docker container: Ctrl+p + Ctrl+q
