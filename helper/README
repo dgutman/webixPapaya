@@ -1,4 +1,4 @@
-# Run helper functions from Docker:
+# Run helper functions from Docker (Jupyter notebook):
 port=8123
 githubDir='/home/fgiuste/Github'
 subjectDir='/HCP_Data/HCP_BedpostData'
@@ -15,3 +15,27 @@ cd /
 # run jupyter-notebook:
 jupyter-notebook
 # Detach Docker container: Ctrl+p + Ctrl+q
+
+
+# Run helper functions from Docker (Terminal):
+## Start screen:
+screen
+
+githubDir='/home/fgiuste/Github'
+subjectDir='/HCP_Data/HCP_BedpostData'
+outputDir='/HCP_Data/NipypeScratch'
+docker run -it --rm \
+-p ${port}:8888 \
+-v ${githubDir}:/code/Github:rw \
+-v ${subjectDir}:/data/HCP_BedpostData:rw \
+-v ${outputDir}:/data/NipypeScratch:rw \
+--name runTNW fgiuste/base:neuro
+
+# Go to webixPapaya/helper
+cd /code/Github/webixPapaya/helper
+# Run 
+python3 Threshold_and_Normalize_fdtpaths_by_waytotal.py
+
+
+# Detach Screen:
+Ctrl+a + Ctrl+d
